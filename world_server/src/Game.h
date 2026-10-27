@@ -635,6 +635,7 @@ public:
 	BOOL _bInitItemAttr(class CItem * pItem, int iItemID);
 	BOOL bReadProgramConfigFile(char * cFn);
 	BOOL bLoadGameDataFiles();	// WORLD-003: game_data_files.cpp
+	BOOL bLoadSkillsFromWorldData();	// WORLD-008: game_data_files.cpp, skills from world.db
 	void GameProcess();
 	void InitPlayerData(int iClientH, char * pData, DWORD dwSize);
 	void ResponsePlayerDataHandler(char * pData, DWORD dwSize);

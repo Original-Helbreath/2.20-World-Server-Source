@@ -25,6 +25,7 @@ namespace hb::server::world
 		std::uint32_t heartbeat_seconds = 5;      // link_heartbeat every this long; 3 missed from Login = loss
 		hb::log::level log_level = hb::log::level::info;  // debug also logs every heartbeat
 		std::string players_database = "data/players.db"; // shared with the Login server (its database.path)
+		std::string world_database = "data/world.db";     // the templates (WORLD-008); built by world_import
 	};
 
 	// False with a message in error when the file is missing, is not valid JSON, has an unknown key or has a

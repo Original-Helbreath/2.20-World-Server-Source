@@ -143,6 +143,37 @@
 			<ForcedIncludeFiles></ForcedIncludeFiles>
 			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
+		<!-- WORLD-008: world.db (templates) through Schemata, the players.db -> world.db reference check, the CP949 text
+		     codec (Win32, platform file) and the skill rows <-> CSkill mapping. New code: strict warnings. -->
+		<ClCompile Include="src\world_database.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\template_references.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\world_data.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\text_codec_win32.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\skill_legacy.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+		</ClCompile>
 		<!-- shared/net and shared/protocol: the one network implementation of all three programs. The object folder keeps
 		     shared/net/client.cpp apart from the game's Client.cpp (file names compare case-insensitively). -->
 		<ClCompile Include="..\shared\net\connection.cpp">
@@ -257,6 +288,13 @@
 		<!-- WORLD-004: the character tables, compiled into world_server_tests. The program does not link Schemata yet: it builds on the static runtime and Schemata on the dynamic one. -->
 		<ClInclude Include="src\entities.h" />
 		<ClInclude Include="src\database.h" />
+		<ClInclude Include="src\world_templates.h" />
+		<ClInclude Include="src\world_entities.h" />
+		<ClInclude Include="src\world_database.h" />
+		<ClInclude Include="src\template_references.h" />
+		<ClInclude Include="src\world_data.h" />
+		<ClInclude Include="src\text_codec.h" />
+		<ClInclude Include="src\skill_legacy.h" />
 		<ClInclude Include="src\character_store.h" />
 		<ClInclude Include="src\character_service.h" />
 		<ClInclude Include="src\character_host.h" />

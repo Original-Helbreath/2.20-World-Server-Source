@@ -74,6 +74,12 @@ namespace hb::server::world
 			});
 			std::ranges::sort(record.skills, [](const character_skill& a, const character_skill& b) { return a.skill_id < b.skill_id; });
 			std::ranges::sort(record.magic, [](const character_magic& a, const character_magic& b) { return a.magic_id < b.magic_id; });
+			if (!resolve_templates(record, error))
+			{
+				error = std::format("character {}: {}", record.header.name, error);
+				record = character_record{};
+				return load_result::failed;
+			}
 			return load_result::loaded;
 		}
 		catch (const std::exception& failure)
@@ -83,9 +89,23 @@ namespace hb::server::world
 		}
 	}
 
+	bool character_store::resolve_templates(const character_record& record, std::string& error) const
+	{
+		std::vector<std::int64_t> skill_ids;
+		skill_ids.reserve(record.skills.size());
+		for (const character_skill& row : record.skills)
+			skill_ids.push_back(row.skill_id);
+		return m_templates.resolve_skills(skill_ids, error);
+	}
+
 	bool character_store::save(character_record& record, std::string& error)
 	{
 		error.clear();
+		if (!resolve_templates(record, error))
+		{
+			error = std::format("character {} not saved: {}", record.header.name, error);
+			return false;
+		}
 		try
 		{
 			const schemata::timestamp now = std::chrono::floor<std::chrono::microseconds>(std::chrono::system_clock::now());

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- WORLD-008: builds world.db from the legacy World files and compares the two (world_import - -compare).
+	     New code: strict warnings, conforming. The legacy CSkill and CStrTok are compiled in with their own warnings. -->
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<VCProjectVersion>18.0</VCProjectVersion>
+		<ProjectGuid>{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}</ProjectGuid>
+		<RootNamespace>world_import</RootNamespace>
+		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v145</PlatformToolset>
+		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+		<UseDebugLibraries>false</UseDebugLibraries>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+		<!-- Schemata is built with /MD and /MDd, so this project links the dynamic runtime. -->
+		<Import Project="$(SolutionDir)third_party\schemata\schemata.props" />
+	</ImportGroup>
+	<PropertyGroup>
+		<OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<SDLCheck>true</SDLCheck>
+			<ConformanceMode>true</ConformanceMode>
+			<LanguageStandard>stdcpp20</LanguageStandard>
+			<AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+			<AdditionalIncludeDirectories>$(SolutionDir)world_server\src;$(SolutionDir)shared\log;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<SubSystem>Console</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+		<ClCompile>
+			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+		<ClCompile>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClCompile Include="src\main.cpp" />
+		<ClCompile Include="..\world_server\src\world_database.cpp" />
+		<ClCompile Include="..\world_server\src\skill_legacy.cpp" />
+		<ClCompile Include="..\world_server\src\text_codec_win32.cpp" />
+		<ClCompile Include="..\shared\log\log.cpp" />
+		<ClCompile Include="..\shared\log\console_win32.cpp" />
+		<ClCompile Include="..\shared\log\console_posix.cpp" />
+		<!-- Legacy game classes, unchanged: legacy warnings, not conforming. -->
+		<ClCompile Include="..\world_server\src\Skill.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<SDLCheck>false</SDLCheck>
+			<ConformanceMode>false</ConformanceMode>
+		</ClCompile>
+		<ClCompile Include="..\world_server\src\StrTok.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<SDLCheck>false</SDLCheck>
+			<ConformanceMode>false</ConformanceMode>
+		</ClCompile>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

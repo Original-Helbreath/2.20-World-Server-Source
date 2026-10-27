@@ -2,6 +2,7 @@
 
 #include "database.h"
 #include "entities.h"
+#include "template_references.h"
 
 #include <cstdint>
 #include <string>
@@ -31,7 +32,9 @@ namespace hb::server::world
 	class character_store
 	{
 	public:
-		explicit character_store(database& db) : m_database(db) {}
+		// templates resolves the character rows' keys into world.db (skill ids) before a load is returned or a save
+		// is written; an unresolved key fails the call.
+		character_store(database& db, const template_references& templates) : m_database(db), m_templates(templates) {}
 
 		// Lowercase key a name is stored and found under.
 		static std::string name_key(std::string_view name);
@@ -52,6 +55,9 @@ namespace hb::server::world
 		bool remove(std::string_view name, std::string& error);
 
 	private:
+		bool resolve_templates(const character_record& record, std::string& error) const;
+
 		database& m_database;
+		const template_references& m_templates;
 	};
 }

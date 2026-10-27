@@ -1,13 +1,18 @@
 // WORLD-003: the game data the log server used to push to the game server when it registered (Npc, Item, Magic,
 // Skill, Quest, BuildItem, DupItemID, Potion and WLserver) is read from GameData\ here, until world.db holds it.
 // Every file goes through the decoder the push used, so the game logic is unchanged.
+// WORLD-008: world.db replaces these files one kind at a time; skills already come from it (slice 1).
 
 #include "Game.h"
 
 #include "log.h"
+#include "Skill.h"
+#include "skill_legacy.h"
+#include "world_data.h"
 
 #include <fstream>
 #include <iterator>
+#include <string>
 #include <vector>
 
 namespace
@@ -38,7 +43,6 @@ BOOL CGame::bLoadGameDataFiles()
 		{ "GameData\\Item.cfg",      &CGame::_bDecodeItemConfigFileContents,      &m_bIsItemAvailable,      "Item" },
 		{ "GameData\\Item2.cfg",     &CGame::_bDecodeItemConfigFileContents,      &m_bIsItemAvailable,      "Item" },
 		{ "GameData\\Magic.cfg",     &CGame::_bDecodeMagicConfigFileContents,     &m_bIsMagicAvailable,     "Magic" },
-		{ "GameData\\Skill.cfg",     &CGame::_bDecodeSkillConfigFileContents,     &m_bIsSkillAvailable,     "Skill" },
 		{ "GameData\\Item3.cfg",     &CGame::_bDecodeItemConfigFileContents,      &m_bIsItemAvailable,      "Item" },
 		{ "GameData\\Quest.cfg",     &CGame::_bDecodeQuestConfigFileContents,     &m_bIsQuestAvailable,     "Quest" },
 		{ "GameData\\BuildItem.cfg", &CGame::_bDecodeBuildItemConfigFileContents, &m_bIsBuildItemAvailable, "BuildItem" },
@@ -74,5 +78,40 @@ BOOL CGame::bLoadGameDataFiles()
 		hb::log::error("{} configuration failed to load; the game will not activate", item.pLabel);
 	}
 
+	// WORLD-008 slice 1: skills come from world.db (opened by the host before bInit).
+	if (bLoadSkillsFromWorldData() == FALSE) bAllLoaded = FALSE;
+
 	return bAllLoaded;
+}
+
+BOOL CGame::bLoadSkillsFromWorldData()
+{
+	m_bIsSkillAvailable = FALSE;
+	for (int i = 0; i < DEF_MAXSKILLTYPE; i++) {
+		if (m_pSkillConfigList[i] != NULL) delete m_pSkillConfigList[i];
+		m_pSkillConfigList[i] = NULL;
+	}
+
+	const std::vector<hb::server::world::skill>& skills = hb::server::world::world_skills();
+	for (const hb::server::world::skill& row : skills) {
+		std::string error;
+		if ((row.id < 0) || (row.id >= DEF_MAXSKILLTYPE) || (m_pSkillConfigList[row.id] != NULL)) {
+			hb::log::error("skill {} is outside 0..{} or repeated", row.id, DEF_MAXSKILLTYPE - 1);
+			return FALSE;
+		}
+		CSkill * pSkill = new CSkill;
+		if (!hb::server::world::skill_legacy::to_legacy(row, *pSkill, error)) {
+			delete pSkill;
+			hb::log::error("{}", error);
+			return FALSE;
+		}
+		m_pSkillConfigList[row.id] = pSkill;
+	}
+	if (skills.empty()) {
+		hb::log::error("Skill configuration failed to load; the game will not activate");
+		return FALSE;
+	}
+	hb::log::info("{} skill(s) loaded", skills.size());
+	m_bIsSkillAvailable = TRUE;
+	return TRUE;
 }

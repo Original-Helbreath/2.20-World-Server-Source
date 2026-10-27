@@ -7,6 +7,7 @@
 #include "message_codec.h"
 #include "message_id.h"
 #include "test_runner.h"
+#include "test_world.h"
 
 #include <cstddef>
 #include <filesystem>
@@ -140,7 +141,10 @@ namespace tests
 			std::string error;
 			database db;
 			t.check(db.open((dir / "players.db").string(), 2, error), std::format("players.db opens ({})", error));
-			character_store store(db);
+			world_database templates;
+			t.check(make_world_db(dir / "world.db", { 0, 1, 2 }, templates, error), std::format("world.db opens ({})", error));
+			const template_references references(templates);
+			character_store store(db, references);
 			character_service service(store);
 
 			t.check(service.list(11).summaries.empty() && service.list(11).max_slots == max_character_slots, "empty list, four slots");

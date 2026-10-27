@@ -6,6 +6,7 @@
 #include "log.h"
 #include "login_tables.h"
 #include "test_runner.h"
+#include "test_world.h"
 
 #include <schemata/sqlite.h>
 
@@ -200,7 +201,11 @@ namespace tests
 		database again;
 		t.check(again.open(path, 1, error), std::format("world model reopens ({})", error));
 
-		character_store store(db);
+		// world.db with the skill ids the characters below use (0, 6, ... 48, and 59 added on update).
+		world_database templates;
+		t.check(make_world_db(dir / "world.db", { 0, 6, 12, 18, 24, 30, 36, 42, 48, 59 }, templates, error), std::format("world.db with skills ({})", error));
+		const template_references references(templates);
+		character_store store(db, references);
 		t.check(!store.exists("Aria", error) && error.empty(), "no character yet");
 		character_record missing;
 		t.check(store.load("Aria", missing, error) == load_result::not_found, "unknown character is not_found");
@@ -270,6 +275,28 @@ namespace tests
 		character_record after_rollback;
 		t.check(store.load("Aria", after_rollback, error) == load_result::loaded && after_rollback.header.level == 99 && same_record(after_rollback, updated),
 			"failed save rolled back, nothing half written");
+
+		// players.db -> world.db: a skill id is resolved in world.db before a save is written or a load is returned.
+		{
+			character_record unknown = after_rollback;
+			character_skill stray;
+			fill(stray, 902);
+			stray.skill_id = 7;
+			unknown.skills.push_back(stray);
+			unknown.header.level = 2;
+			t.check(!store.save(unknown, error) && error.find("7") != std::string::npos, std::format("save with a skill id not in world.db refused ({})", error));
+			character_record unchanged;
+			t.check(store.load("Aria", unchanged, error) == load_result::loaded && unchanged.header.level == 99 && same_record(unchanged, updated),
+				"refused save wrote nothing");
+
+			// world.db loses skill 59, which Aria holds: her load is refused, not returned with a dangling id.
+			t.check(fill_world_skills({ 0, 6, 12, 18, 24, 30, 36, 42, 48 }, templates, error), "world.db without skill 59");
+			character_record dangling;
+			t.check(store.load("Aria", dangling, error) == load_result::failed && error.find("59") != std::string::npos,
+				std::format("load with a skill id missing from world.db refused ({})", error));
+			t.check(dangling.skills.empty() && dangling.header.id == 0, "a refused load returns nothing");
+			t.check(fill_world_skills({ 0, 6, 12, 18, 24, 30, 36, 42, 48, 59 }, templates, error), "world.db skills restored");
+		}
 
 		// Real foreign keys between the World's own tables.
 		{

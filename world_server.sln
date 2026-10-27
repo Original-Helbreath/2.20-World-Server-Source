@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "world_server", "world_serve
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "world_server_tests", "world_server_tests\world_server_tests.vcxproj", "{5C8A1F63-2D70-4B94-A3E5-6F1B9D0C7E48}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "world_import", "world_import\world_import.vcxproj", "{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,5 +23,9 @@ Global
 		{5C8A1F63-2D70-4B94-A3E5-6F1B9D0C7E48}.Debug|x64.Build.0 = Debug|x64
 		{5C8A1F63-2D70-4B94-A3E5-6F1B9D0C7E48}.Release|x64.ActiveCfg = Release|x64
 		{5C8A1F63-2D70-4B94-A3E5-6F1B9D0C7E48}.Release|x64.Build.0 = Release|x64
+		{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}.Debug|x64.ActiveCfg = Debug|x64
+		{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}.Debug|x64.Build.0 = Debug|x64
+		{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}.Release|x64.ActiveCfg = Release|x64
+		{8E2D4B17-6A35-4C0F-9B81-3D7E5A1C2F94}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal

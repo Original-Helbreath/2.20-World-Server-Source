@@ -48,6 +48,21 @@
 		<ClCompile Include="src\character_host.cpp">
 			<Filter>source</Filter>
 		</ClCompile>
+		<ClCompile Include="src\world_database.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\template_references.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\world_data.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\text_codec_win32.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\skill_legacy.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
 		<ClCompile Include="..\shared\net\connection.cpp">
 			<Filter>shared</Filter>
 		</ClCompile>

@@ -19,7 +19,7 @@ namespace hb::server::world
 		std::unique_ptr<character_service> g_service;
 	}
 
-	character_service* open_characters(const std::string& players_database)
+	character_service* open_characters(const std::string& players_database, const template_references& templates)
 	{
 		close_characters();
 		auto opened = std::make_unique<database>();
@@ -30,7 +30,7 @@ namespace hb::server::world
 			return nullptr;
 		}
 		g_database = std::move(opened);
-		g_store = std::make_unique<character_store>(*g_database);
+		g_store = std::make_unique<character_store>(*g_database, templates);
 		g_service = std::make_unique<character_service>(*g_store);
 		return g_service.get();
 	}

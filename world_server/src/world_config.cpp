@@ -57,9 +57,10 @@ namespace hb::server::world
 
 			bool read(const nlohmann::json& root)
 			{
-				allow_keys(root, { "login_address", "login_port", "world_name", "link_key", "heartbeat_seconds", "log_level", "players_database" });
+				allow_keys(root, { "login_address", "login_port", "world_name", "link_key", "heartbeat_seconds", "log_level", "players_database", "world_database" });
 				read_level(root);
 				read_string(root, "players_database", m_config.players_database);
+				read_string(root, "world_database", m_config.world_database);
 				read_string(root, "login_address", m_config.login_address);
 				read_number(root, "login_port", m_config.login_port, min_port, std::numeric_limits<std::uint16_t>::max());
 				read_number(root, "heartbeat_seconds", m_config.heartbeat_seconds, min_heartbeat_seconds, max_heartbeat_seconds);

@@ -44,4 +44,7 @@ namespace tests
 
 	// character_service_tests.cpp: list, create and delete answers, new-character defaults, summaries, envelope ids
 	void character_service_tests(runner& t, const std::filesystem::path& folder);
+
+	// world_tests.cpp: world.db skills, the legacy Skill.cfg rules, rows to CSkill and the CP949 names (WORLD-008)
+	void world_tests(runner& t, const std::filesystem::path& folder);
 }

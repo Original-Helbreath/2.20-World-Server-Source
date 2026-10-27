@@ -18,6 +18,7 @@
 #include "login_link.h"
 #include "platform_win32.h"
 #include "world_config.h"
+#include "world_data.h"
 
 char			G_cTxt[512];
 char			G_cData50000[50000];
@@ -146,6 +147,9 @@ namespace
 			return false;
 		}
 
+		// WORLD-008: the templates come from world.db; the game copies them in during bInit.
+		if (!hb::server::world::open_world_data(config.world_database)) return false;
+
 		HWND window = platform::create_message_window(dispatch_message);
 		if (window == nullptr) {
 			hb::log::error("cannot create the socket-event window");
@@ -166,7 +170,7 @@ namespace
 		hb::log::info("listening on {}:{}", G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort);
 
 		// WORLD-006: players.db holds the characters the Login server lists, creates and deletes through this World.
-		hb::server::world::character_service * characters = hb::server::world::open_characters(config.players_database);
+		hb::server::world::character_service * characters = hb::server::world::open_characters(config.players_database, *hb::server::world::world_references());
 		if (characters == nullptr) return false;
 
 		start_login_link(config, characters);
@@ -212,6 +216,7 @@ namespace
 			G_pLoginLink.reset();
 		}
 		hb::server::world::close_characters();
+		hb::server::world::close_world_data();  // after the characters: their store checks keys against it
 
 		if (G_pListenSock != NULL) delete G_pListenSock;
 		G_pListenSock = NULL;
