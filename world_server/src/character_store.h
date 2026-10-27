@@ -38,6 +38,9 @@ namespace hb::server::world
 
 		bool exists(std::string_view name, std::string& error);
 
+		// The headers (no child rows) of an account's characters, oldest first. False (with the reason) on a fault.
+		bool list_for_account(std::int64_t account_id, std::vector<character>& characters, std::string& error);
+
 		// Reads a character by name, any case. Items are ordered bag then bank, by slot.
 		load_result load(std::string_view name, character_record& record, std::string& error);
 

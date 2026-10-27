@@ -1,6 +1,6 @@
-## Character tables in players.db
+## Character list, create and delete
 
 **Added**
-- Characters will be stored in the shared player database with their items, bank, skills and magic. No visible change yet.
+- Characters are listed, created and deleted on the World server, and new characters start with the classic starting kit.
 
-Summary: Groundwork for saving characters (2026-10-27)
+Summary: Character select is served by the World (2026-10-27)
