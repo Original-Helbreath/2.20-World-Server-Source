@@ -1,9 +1,6 @@
-## Build the game server as the World server base
-
-**Added**
-- The game server logic builds with a current version of Visual Studio as the start of the World server.
+## Run the World server as a console program
 
 **Changed**
-- Chat commands that had Korean names now use English ones: `/find`, `/whisper`, `/setprofile`, `/profile`, `/goodrep`, `/badrep`, `/target` and `/kick`.
+- The World server runs in a console window and stops with Ctrl+C.
 
-Summary: The World server starts from the original game logic, now in English and building with modern tools (2026-10-27)
+Summary: The World server is now a plain console program (2026-10-27)

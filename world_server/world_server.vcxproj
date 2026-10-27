@@ -54,11 +54,12 @@
 			<!-- winsock2.h first, so windows.h never pulls the old winsock.h (the VC6 SDK tolerated both). -->
 			<!-- Side effect: winsock2.h sets FD_SETSIZE first, so XSocket.h's FD_SETSIZE 2000 has no effect (C4005); harmless, the code never calls select(). -->
 			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-			<AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)shared\log;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>WIN32;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
 		<Link>
-			<SubSystem>Windows</SubSystem>
+			<!-- WORLD-002: console program; the Win32 window shell is gone. -->
+			<SubSystem>Console</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<AdditionalDependencies>winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
 		</Link>
@@ -83,7 +84,33 @@
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClCompile Include="src\Wmain.cpp" />
+		<ClCompile Include="src\main.cpp" />
+		<!-- WORLD-002: the Win32 message-only window, Ctrl+C handler and wait loop. New code: strict warnings. -->
+		<ClCompile Include="src\platform_win32.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+		</ClCompile>
+		<ClCompile Include="src\legacy_log_files.cpp" />
+		<!-- shared/log (hb::log) builds as the Login server builds it: Level4, warnings as errors, conforming, no forced winsock2.h. -->
+		<ClCompile Include="..\shared\log\log.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="..\shared\log\console_win32.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="..\shared\log\console_posix.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
 		<ClCompile Include="src\Game.cpp" />
 		<ClCompile Include="src\Client.cpp" />
 		<ClCompile Include="src\Teleport.cpp" />
@@ -145,7 +172,9 @@
 		<ClInclude Include="src\Tile.h" />
 		<ClInclude Include="src\UserMessages.h" />
 		<ClInclude Include="src\Version.h" />
-		<ClInclude Include="src\WINMAIN.H" />
+		<ClInclude Include="src\platform_win32.h" />
+		<ClInclude Include="..\shared\log\log.h" />
+		<ClInclude Include="..\shared\log\console.h" />
 		<ClInclude Include="src\XSocket.h" />
 	</ItemGroup>
 	<ItemGroup>
