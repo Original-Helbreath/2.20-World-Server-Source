@@ -34,6 +34,9 @@
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 	<ImportGroup Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+		<!-- WORLD-006: Schemata is built with /MD and /MDd, so the World links the dynamic runtime (the default) as the
+		     Login server does; the vcruntime and msvcp DLLs must be present where it runs. -->
+		<Import Project="$(SolutionDir)third_party\schemata\schemata.props" />
 	</ImportGroup>
 	<PropertyGroup>
 		<OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
@@ -71,7 +74,6 @@
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
 		<ClCompile>
 			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
 		</ClCompile>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -80,7 +82,6 @@
 			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<IntrinsicFunctions>true</IntrinsicFunctions>
 			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 		</ClCompile>
 		<Link>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -114,6 +115,33 @@
 			<ForcedIncludeFiles></ForcedIncludeFiles>
 			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<!-- WORLD-006: players.db through Schemata and the character list, create and delete answers. New code: strict warnings. -->
+		<ClCompile Include="src\database.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\character_store.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+		</ClCompile>
+		<ClCompile Include="src\character_service.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<ClCompile Include="src\character_host.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
 		<!-- shared/net and shared/protocol: the one network implementation of all three programs. The object folder keeps
 		     shared/net/client.cpp apart from the game's Client.cpp (file names compare case-insensitively). -->
@@ -230,6 +258,8 @@
 		<ClInclude Include="src\entities.h" />
 		<ClInclude Include="src\database.h" />
 		<ClInclude Include="src\character_store.h" />
+		<ClInclude Include="src\character_service.h" />
+		<ClInclude Include="src\character_host.h" />
 		<ClInclude Include="..\shared\net\asio_config.h" />
 		<ClInclude Include="..\shared\net\connection.h" />
 		<ClInclude Include="..\shared\net\client.h" />

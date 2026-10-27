@@ -36,6 +36,18 @@
 		<ClCompile Include="src\login_link.cpp">
 			<Filter>source</Filter>
 		</ClCompile>
+		<ClCompile Include="src\database.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\character_store.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\character_service.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\character_host.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
 		<ClCompile Include="..\shared\net\connection.cpp">
 			<Filter>shared</Filter>
 		</ClCompile>

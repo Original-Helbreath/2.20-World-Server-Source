@@ -34,6 +34,25 @@ namespace hb::server::world
 		}
 	}
 
+	bool character_store::list_for_account(std::int64_t account_id, std::vector<character>& characters, std::string& error)
+	{
+		error.clear();
+		characters.clear();
+		try
+		{
+			schemata::ConnectionPool::Lease lease = m_database.pool().acquire();
+			characters = schemata::from<character>(*lease, m_database.model()).where(schemata::col(&character::account_id) == account_id).to_vector();
+			std::ranges::sort(characters, [](const character& a, const character& b) { return a.id < b.id; });
+			return true;
+		}
+		catch (const std::exception& failure)
+		{
+			characters.clear();
+			error = failure.what();
+			return false;
+		}
+	}
+
 	load_result character_store::load(std::string_view name, character_record& record, std::string& error)
 	{
 		error.clear();

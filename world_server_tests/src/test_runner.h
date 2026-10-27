@@ -41,4 +41,7 @@ namespace tests
 
 	// character_tests.cpp: the character tables against a throwaway players.db that already holds the Login's accounts
 	void character_tests(runner& t, const std::filesystem::path& folder);
+
+	// character_service_tests.cpp: list, create and delete answers, new-character defaults, summaries, envelope ids
+	void character_service_tests(runner& t, const std::filesystem::path& folder);
 }

@@ -48,7 +48,7 @@
 			<ConformanceMode>true</ConformanceMode>
 			<LanguageStandard>stdcpp20</LanguageStandard>
 			<AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-			<AdditionalIncludeDirectories>$(SolutionDir)world_server\src;$(SolutionDir)shared\log;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)world_server\src;$(SolutionDir)shared\log;$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
 		<Link>
@@ -80,6 +80,9 @@
 		<ClCompile Include="..\shared\log\console_posix.cpp" />
 		<ClCompile Include="..\world_server\src\database.cpp" />
 		<ClCompile Include="..\world_server\src\character_store.cpp" />
+		<ClCompile Include="src\character_service_tests.cpp" />
+		<ClCompile Include="..\world_server\src\character_service.cpp" />
+		<ClCompile Include="..\shared\protocol\frame_codec.cpp" />
 	</ItemGroup>
 	<ItemGroup>
 		<ClInclude Include="src\test_runner.h" />

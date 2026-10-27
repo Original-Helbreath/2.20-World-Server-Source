@@ -36,12 +36,15 @@ namespace hb::server::world
 		bool operator==(const link_report&) const = default;
 	};
 
+	class character_service;
+
 	struct link_events
 	{
 		std::function<void()> on_registered;                   // the Login accepted this World
 		std::function<void()> on_lost;                         // a registered link went down; reconnecting
 		std::function<void(std::string_view)> on_refused;      // refused for good (wrong key, unknown world); no retry
 		std::function<link_report()> report;                   // current status
+		character_service* characters = nullptr;               // answers list, create and delete (WORLD-006); null: refused
 	};
 
 	class login_link

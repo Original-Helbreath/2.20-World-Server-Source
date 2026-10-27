@@ -14,6 +14,7 @@
 
 #include "Game.h"
 #include "UserMessages.h"
+#include "character_host.h"
 #include "login_link.h"
 #include "platform_win32.h"
 #include "world_config.h"
@@ -87,7 +88,7 @@ namespace
 
 	// The Login link: registers this World, keeps the heartbeats going and reconnects. The game activates once it
 	// is registered and refuses new players while it is down.
-	void start_login_link(const hb::server::world::world_config& config)
+	void start_login_link(const hb::server::world::world_config& config, hb::server::world::character_service * characters)
 	{
 		namespace world = hb::server::world;
 
@@ -117,6 +118,7 @@ namespace
 			report.max_players = static_cast<std::uint16_t>(DEF_MAXCLIENTS - 1);
 			return report;
 		};
+		events.characters = characters;
 
 		G_pLoginLink = std::make_unique<world::login_link>(config, std::move(registration), std::move(events));
 		G_pLoginLink->start();
@@ -163,7 +165,11 @@ namespace
 		}
 		hb::log::info("listening on {}:{}", G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort);
 
-		start_login_link(config);
+		// WORLD-006: players.db holds the characters the Login server lists, creates and deletes through this World.
+		hb::server::world::character_service * characters = hb::server::world::open_characters(config.players_database);
+		if (characters == nullptr) return false;
+
+		start_login_link(config, characters);
 		return true;
 	}
 
@@ -205,6 +211,7 @@ namespace
 			G_pLoginLink->stop();
 			G_pLoginLink.reset();
 		}
+		hb::server::world::close_characters();
 
 		if (G_pListenSock != NULL) delete G_pListenSock;
 		G_pListenSock = NULL;

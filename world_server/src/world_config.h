@@ -24,6 +24,7 @@ namespace hb::server::world
 		std::array<std::uint8_t, link_key_bytes> link_key{};  // shared secret, 64 hex digits in the file; never logged
 		std::uint32_t heartbeat_seconds = 5;      // link_heartbeat every this long; 3 missed from Login = loss
 		hb::log::level log_level = hb::log::level::info;  // debug also logs every heartbeat
+		std::string players_database = "data/players.db"; // shared with the Login server (its database.path)
 	};
 
 	// False with a message in error when the file is missing, is not valid JSON, has an unknown key or has a

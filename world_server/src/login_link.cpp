@@ -1,5 +1,6 @@
 #include "login_link.h"
 
+#include "character_service.h"
 #include "log.h"
 // By path: a plain "client.h" would find the game's own Client.h in this directory first.
 #include "../../shared/net/client.h"
@@ -8,7 +9,10 @@
 #include "periodic_timer.h"
 
 #include <chrono>
+#include <cstddef>
+#include <span>
 #include <thread>
+#include <vector>
 #include <utility>
 
 namespace hb::server::world
@@ -75,6 +79,9 @@ namespace hb::server::world
 		void on_failure(std::string_view error);
 		void on_frame(hb::net::connection& from, const hb::net::frame& received);
 		void on_register_response(hb::net::connection& from, const hb::net::frame& received);
+		void on_character_list(hb::net::connection& from, const hb::net::frame& received);
+		void on_create_character(hb::net::connection& from, const hb::net::frame& received);
+		void on_delete_character(hb::net::connection& from, const hb::net::frame& received);
 		void on_close(hb::net::connection& from, close_reason reason, std::string_view detail);
 		void start_timers(hb::net::connection& from);
 		void stop_timers();
@@ -170,17 +177,78 @@ namespace hb::server::world
 			return;  // any whole frame has already reset the idle timer
 		}
 		case message_id::link_character_list_request:
+			on_character_list(from, received);
+			return;
 		case message_id::link_create_character_request:
+			on_create_character(from, received);
+			return;
 		case message_id::link_delete_character_request:
+			on_delete_character(from, received);
+			return;
 		case message_id::link_session_grant:
 		case message_id::link_kick_account:
-			// Character and session requests are answered from LOGIN-007 and the character work on.
+			// Session requests are answered from WORLD-005 on.
 			hb::log::debug("login request 0x{:04x} not handled yet", id);
 			return;
 		default:
 			hb::log::warning("unexpected message 0x{:04x} from the Login server", id);
 			return;
 		}
+	}
+
+	void login_link::impl::on_character_list(hb::net::connection& from, const hb::net::frame& received)
+	{
+		link::character_list_request request{};
+		if (!hb::net::decode(received, request))
+		{
+			from.close(close_reason::protocol_error, "malformed character_list_request");
+			return;
+		}
+		character_list_answer answer;
+		if (events.characters != nullptr)
+			answer = events.characters->list(request.account_id);
+		link::character_list_response head{};
+		head.request_id = request.request_id;
+		head.max_slots = answer.max_slots;
+		head.count = static_cast<std::uint8_t>(answer.summaries.size());
+		std::vector<std::byte> bytes;
+		if (!hb::net::encode_character_list(head, std::span<const hb::net::character_summary>(answer.summaries),
+				hb::net::connection_options{}.max_body_bytes, bytes))
+		{
+			hb::log::error("character list for account {} does not fit the packet", request.account_id);
+			head.count = 0;
+			if (!hb::net::encode_character_list(head, std::span<const hb::net::character_summary>(), hb::net::connection_options{}.max_body_bytes, bytes))
+				return;
+		}
+		from.send_encoded(std::move(bytes));
+	}
+
+	void login_link::impl::on_create_character(hb::net::connection& from, const hb::net::frame& received)
+	{
+		link::create_character_request request{};
+		if (!hb::net::decode(received, request))
+		{
+			from.close(close_reason::protocol_error, "malformed create_character_request");
+			return;
+		}
+		link::character_change_response response{};
+		response.request_id = request.request_id;
+		response.result = events.characters != nullptr ? events.characters->create(request) : hb::net::login::character_result::world_unavailable;
+		(void)from.send(response);
+	}
+
+	void login_link::impl::on_delete_character(hb::net::connection& from, const hb::net::frame& received)
+	{
+		link::delete_character_request request{};
+		if (!hb::net::decode(received, request))
+		{
+			from.close(close_reason::protocol_error, "malformed delete_character_request");
+			return;
+		}
+		link::character_change_response response{};
+		response.request_id = request.request_id;
+		response.result = events.characters != nullptr ? events.characters->remove(request) : hb::net::login::character_result::world_unavailable;
+		(void)from.send(response);
 	}
 
 	void login_link::impl::on_register_response(hb::net::connection& from, const hb::net::frame& received)

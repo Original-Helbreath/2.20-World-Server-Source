@@ -29,6 +29,7 @@ int main()
 	try
 	{
 		tests::character_tests(t, folder);
+		tests::character_service_tests(t, folder);
 	}
 	catch (const std::exception& failure)
 	{
