@@ -1,15 +1,17 @@
-## Build the game server as the World server base
+## Run the World server as a console program
 
 ### World Server
 
-**Added**
-- `world_server.sln` and `world_server\world_server.vcxproj` (VS 2026, v145, x64 Debug and Release, /W3), building the 2.20 game server source imported unchanged into `world_server\src`.
-
 **Changed**
-- Translated every Korean comment, log string, item name and chat command in the World source to English; the source is pure ASCII and the CP949 execution charset is dropped.
-- Replaced the Korean chat-command aliases with English ones (`/find`, `/whisper`, `/setprofile`, `/profile`, `/goodrep`, `/badrep`, `/target`, `/kick`), with their match lengths corrected.
+- The World server is a console program: the Win32 window, message loop, list-box log and multimedia timer are replaced by a console host (`main.cpp`) that drives the game's 300 ms tick and shuts down on Ctrl+C, Ctrl+Break or a console close.
+- Log output goes through the shared `hb::log`; the legacy `PutLogList` feeds it.
+- A hidden message-only window in `platform_win32.cpp` carries the legacy socket events until the Login link replaces the legacy sockets (WORLD-003).
+- A failure to listen on the game port now stops start-up instead of being ignored.
+
+**Added**
+- The `shared/` submodule (2.20-Shared); `shared/log` is built into the World server.
 
 **Fixed**
-- Two breaks on x64: an ambiguous `abs` on a `DWORD` difference in `Game.cpp`, and the `timeSetEvent` callback signature (`DWORD_PTR`) in `Wmain.cpp` / `WINMAIN.H`.
+- The item log file pointer is cleared after closing, so shutdown no longer closes it twice.
 
-Summary: World Server gains an x64 build of the 2.20 game logic with all Korean text translated to English (2026-10-27)
+Summary: World Server runs as a console program with hb::log output and a clean Ctrl+C shutdown (2026-10-27)

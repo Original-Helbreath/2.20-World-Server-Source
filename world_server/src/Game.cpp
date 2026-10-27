@@ -15,7 +15,6 @@ extern void PutLogEventFileList(char * cStr);
 extern void PutDebugMsg(char * cStr);	// 2002-09-09 #2
 
 extern FILE * pLogFile;
-extern HWND	G_hWnd;
 
 
 // Reference file for building messages.
@@ -3683,8 +3682,6 @@ void CGame::OnTimer(char cType)
 		CheckClientResponseTime();
 		SendMsgToGateServer(MSGID_GAMESERVERALIVE, NULL);
 		CheckDayOrNightMode();
-		// Refresh the screen
-		InvalidateRect(G_hWnd, NULL, TRUE);
 		m_dwGameTime2 = dwTime;
 		// v1.41 
 		_CheckGateSockConnection();
