@@ -1,6 +1,6 @@
-## Connect the World to the Login server
+## Character tables in players.db
 
-**Changed**
-- The World server now connects to the Login server instead of the old log and gate servers.
+**Added**
+- Characters will be stored in the shared player database with their items, bank, skills and magic. No visible change yet.
 
-Summary: The World and Login servers are connected (2026-10-27)
+Summary: Groundwork for saving characters (2026-10-27)

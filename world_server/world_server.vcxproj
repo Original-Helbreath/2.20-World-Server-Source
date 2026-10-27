@@ -226,6 +226,10 @@
 		<ClInclude Include="src\platform_win32.h" />
 		<ClInclude Include="src\world_config.h" />
 		<ClInclude Include="src\login_link.h" />
+		<!-- WORLD-004: the character tables, compiled into world_server_tests. The program does not link Schemata yet: it builds on the static runtime and Schemata on the dynamic one. -->
+		<ClInclude Include="src\entities.h" />
+		<ClInclude Include="src\database.h" />
+		<ClInclude Include="src\character_store.h" />
 		<ClInclude Include="..\shared\net\asio_config.h" />
 		<ClInclude Include="..\shared\net\connection.h" />
 		<ClInclude Include="..\shared\net\client.h" />

@@ -1,18 +1,11 @@
-## Connect the World to the Login server
+## Character tables in players.db
 
-### World Server
+### SQL
 
 **Added**
-- The World connects to the Login server's World link as an `hb::net::client`: it registers, heartbeats, reports status and reconnects after a loss; it exits when the Login server refuses its registration for good.
-- New `world_server.json` (JSON with comments) holds the Login address and port, world name, link key, heartbeat interval and log level.
-- The game data the log server used to push is read from `GameData\` at start-up.
-- `third_party/nlohmann_json`, the same copy the Login server uses.
+- The World's Schemata model for players.db: `characters` with `character_items`, `character_skills` and `character_magic`, linked by real FKs with cascade; `account_id` is a plain indexed column until Schemata SCH-0054 adds the FK to `accounts.id`.
+- `database` syncs the tables and `character_store` saves and loads a character with its children in one transaction.
+- Schemata `v0.1.0-rc.24` vendored in `third_party/schemata`.
+- `world_server_tests` project, 39 checks.
 
-**Changed**
-- Game activation waits for a registered Login link, and new players are refused while the link is down.
-- Player-data requests to the old log server are not sent any more (`bSendMsgToLS` returns FALSE), so players cannot enter the game until the character work lands; saving logouts fall back to the local save.
-
-**Removed**
-- The legacy main-log, sub-log and gate sockets and their event handlers.
-
-Summary: World Server registers with the Login server over the shared network layer and activates without the old log and gate servers (2026-10-27)
+Summary: World has character tables in the shared player database, not yet used by world_server.exe (2026-10-27)
