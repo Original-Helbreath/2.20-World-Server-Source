@@ -1,17 +1,18 @@
-## Run the World server as a console program
+## Connect the World to the Login server
 
 ### World Server
 
-**Changed**
-- The World server is a console program: the Win32 window, message loop, list-box log and multimedia timer are replaced by a console host (`main.cpp`) that drives the game's 300 ms tick and shuts down on Ctrl+C, Ctrl+Break or a console close.
-- Log output goes through the shared `hb::log`; the legacy `PutLogList` feeds it.
-- A hidden message-only window in `platform_win32.cpp` carries the legacy socket events until the Login link replaces the legacy sockets (WORLD-003).
-- A failure to listen on the game port now stops start-up instead of being ignored.
-
 **Added**
-- The `shared/` submodule (2.20-Shared); `shared/log` is built into the World server.
+- The World connects to the Login server's World link as an `hb::net::client`: it registers, heartbeats, reports status and reconnects after a loss; it exits when the Login server refuses its registration for good.
+- New `world_server.json` (JSON with comments) holds the Login address and port, world name, link key, heartbeat interval and log level.
+- The game data the log server used to push is read from `GameData\` at start-up.
+- `third_party/nlohmann_json`, the same copy the Login server uses.
 
-**Fixed**
-- The item log file pointer is cleared after closing, so shutdown no longer closes it twice.
+**Changed**
+- Game activation waits for a registered Login link, and new players are refused while the link is down.
+- Player-data requests to the old log server are not sent any more (`bSendMsgToLS` returns FALSE), so players cannot enter the game until the character work lands; saving logouts fall back to the local save.
 
-Summary: World Server runs as a console program with hb::log output and a clean Ctrl+C shutdown (2026-10-27)
+**Removed**
+- The legacy main-log, sub-log and gate sockets and their event handlers.
+
+Summary: World Server registers with the Login server over the shared network layer and activates without the old log and gate servers (2026-10-27)

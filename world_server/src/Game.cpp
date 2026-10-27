@@ -4,6 +4,8 @@
 
 #include "Game.h"
 
+#include "log.h"
+
 extern void PutLogList(char * cMsg);
 extern char G_cTxt[512];
 extern char	G_cData50000[50000];		// For access to large data.
@@ -272,8 +274,7 @@ CGame::CGame(HWND hWnd)
 	m_hWnd           = hWnd;
 	m_pMainLogSock   = NULL;
 	m_pGateSock      = NULL;
-	m_bIsLogSockAvailable   = FALSE;
-	m_bIsGateSockAvailable  = FALSE;
+	m_bIsLoginLinkAvailable = FALSE;
 	m_bIsItemAvailable      = FALSE;
 	m_bIsBuildItemAvailable = FALSE;
 	m_bIsNpcAvailable       = FALSE;
@@ -401,7 +402,7 @@ BOOL CGame::bAccept(class XSocket * pXSock)
  class XSocket * pTmpSock;
  char  cTxt[120];
 
-	if ((m_bIsGateSockAvailable == FALSE) || (m_bIsLogSockAvailable == FALSE)   || 
+	if ((m_bIsLoginLinkAvailable == FALSE) || 
 		(m_bIsItemAvailable == FALSE)     || (m_bIsNpcAvailable == FALSE)       || 
 		(m_bIsMagicAvailable == FALSE)    || (m_bIsSkillAvailable == FALSE)     || 
 		(m_bIsPortionAvailable == FALSE)  || (m_bOnExitProcess == TRUE)         || 
@@ -608,8 +609,7 @@ BOOL CGame::bInit()
 
 	m_pMainLogSock  = NULL;
 	m_pGateSock = NULL;
-	m_bIsLogSockAvailable   = FALSE;
-	m_bIsGateSockAvailable  = FALSE;
+	m_bIsLoginLinkAvailable = FALSE;
 	m_bIsItemAvailable      = FALSE;
 	m_bIsBuildItemAvailable = FALSE;
 	m_bIsNpcAvailable       = FALSE;
@@ -794,24 +794,9 @@ BOOL CGame::bInit()
 	}
 	
 	srand( (unsigned)time( NULL ) );   
-	// Try to connect to the Main Log Socket
-	m_pMainLogSock = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-	m_pMainLogSock->bConnect(m_cLogServerAddr, m_iLogServerPort, WM_ONLOGSOCKETEVENT);
-	m_pMainLogSock->bInitBufferSize(DEF_MSGBUFFERSIZE);
-	
-	wsprintf(cTxt, "(!) Try to Connect main-log-socket... Addr:%s  Port:%d", m_cLogServerAddr, m_iLogServerPort);
-	PutLogList(cTxt);
-	
-	// Try to connect to the Gate Server
-
-	m_pGateSock = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-	m_pGateSock->bConnect(m_cGateServerAddr, m_iGateServerPort, WM_ONGATESOCKETEVENT);
-	m_pGateSock->bInitBufferSize(DEF_MSGBUFFERSIZE);
-	// v1.41 For checking the connect time
-	m_iGateSockConnRetryTimes = 1;
-
-	wsprintf(cTxt, "(!) Try to Connect Gate Server... Addr:%s  Port:%d", m_cGateServerAddr, m_iGateServerPort);
-	PutLogList(cTxt);
+	// WORLD-003: the main-log, sub-log and gate sockets are gone. The Login link (login_link.cpp, started by the
+	// host) replaces them, and the game data the log server pushed is read from GameData\ instead.
+	bLoadGameDataFiles();
 
 	m_bF1pressed = m_bF4pressed = m_bF12pressed = FALSE;
 	
@@ -3680,19 +3665,15 @@ void CGame::OnTimer(char cType)
 
 	if ((dwTime - m_dwGameTime2) > 3000) {
 		CheckClientResponseTime();
-		SendMsgToGateServer(MSGID_GAMESERVERALIVE, NULL);
 		CheckDayOrNightMode();
 		m_dwGameTime2 = dwTime;
-		// v1.41 
-		_CheckGateSockConnection();
 		
-		// v1.41
+		// WORLD-003: ready once the game data is loaded and the Login link is registered.
 		if ((m_bIsGameStarted == FALSE)     && (m_bIsItemAvailable == TRUE)      && 
-			(m_bIsNpcAvailable == TRUE)     && (m_bIsGateSockAvailable == TRUE)  &&
-			(m_bIsLogSockAvailable == TRUE) && (m_bIsMagicAvailable == TRUE)     &&
+			(m_bIsNpcAvailable == TRUE)     && (m_bIsLoginLinkAvailable == TRUE) &&
+			(m_bIsMagicAvailable == TRUE)   &&
 			(m_bIsSkillAvailable == TRUE)   && (m_bIsPortionAvailable == TRUE)   &&
-			(m_bIsQuestAvailable == TRUE)   && (m_bIsBuildItemAvailable == TRUE) && 
-			(m_iSubLogSockActiveCount == DEF_MAXSUBLOGSOCK)
+			(m_bIsQuestAvailable == TRUE)   && (m_bIsBuildItemAvailable == TRUE)
 #ifdef DEF_DEFENCEHACKING
 			// 2002-12-8 For World server security settings
 			&& (m_bIsWLServerAvailable == TRUE)
@@ -3720,18 +3701,6 @@ void CGame::OnTimer(char cType)
 				return;
 				
 			}
-		}
-
-		// v1.432-3 Create the Sub-Log-Sockets in parts, not all at once.
-		if (m_iSubLogSockInitIndex < DEF_MAXSUBLOGSOCK) {
-			m_pSubLogSock[m_iSubLogSockInitIndex] = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-			m_pSubLogSock[m_iSubLogSockInitIndex]->bConnect(m_cLogServerAddr, m_iLogServerPort, (WM_ONLOGSOCKETEVENT + m_iSubLogSockInitIndex + 1));
-			m_pSubLogSock[m_iSubLogSockInitIndex]->bInitBufferSize(DEF_MSGBUFFERSIZE);
-			
-			wsprintf(G_cTxt, "(!) Try to connect sub-log-socket(%d)... Addr:%s  Port:%d", m_iSubLogSockInitIndex, m_cLogServerAddr, m_iLogServerPort);
-			PutLogList(G_cTxt);
-			
-			m_iSubLogSockInitIndex++;
 		}
 
 		m_dwGameTime6 = dwTime;	
@@ -4138,68 +4107,6 @@ void CGame::CheckClientResponseTime()
 	}
 }
 
-void CGame::OnMainLogSocketEvent(UINT message, WPARAM wParam, LPARAM lParam)
-{
- int   iRet;
-	
-	if (m_pMainLogSock == NULL) return;
-
-	iRet = m_pMainLogSock->iOnSocketEvent(wParam, lParam);
-
-	switch (iRet) {
-	case DEF_XSOCKEVENT_CONNECTIONESTABLISH:
-		// Connected to the log server, so send the game server registration message.
-		PutLogList("(!!!) Main-log-socket connected!");
-		bSendMsgToLS(MSGID_REQUEST_REGISTERGAMESERVER, NULL);
-		break;
-	
-	case DEF_XSOCKEVENT_READCOMPLETE:
-		// A message was received.
-		OnMainLogRead();
-		break;
-	
-	case DEF_XSOCKEVENT_BLOCK:
-		// PutLogList("(!!!) Main-log-socket BLOCKED!");
-		break;
-	
-	case DEF_XSOCKEVENT_CONFIRMCODENOTMATCH:
-		// The confirm code does not match.
-	case DEF_XSOCKEVENT_MSGSIZETOOLARGE:
-		// The message to receive is larger than the buffer.	Must close.
-	case DEF_XSOCKEVENT_SOCKETERROR:
-		// Socket error.
-	case DEF_XSOCKEVENT_SOCKETCLOSED:
-		// Socket closed.
-		delete m_pMainLogSock;
-		m_pMainLogSock = NULL;
-		PutLogList("(!!!) Main-log-socket connection lost!");
-		m_bIsLogSockAvailable = FALSE;
-
-		// The log server connection is lost and cannot be recovered. Shut the server down automatically.
-		if (m_bOnExitProcess == FALSE) {
-			m_cShutDownCode      = 3;
-			m_bOnExitProcess     = TRUE;
-			m_dwExitProcessTime  = timeGetTime();
-			// Once the game server shutdown starts, further client connections are refused.
-			PutLogList("(!!!) GAME SERVER SHUTDOWN PROCESS BEGIN(by main-log-socket connection Lost)!!!");
-		}
-		break;
-	}
-}
-
-void CGame::OnMainLogRead()
-{
- DWORD dwMsgSize;
- char * pData, cKey;
-
-	pData = m_pMainLogSock->pGetRcvDataPointer(&dwMsgSize, &cKey);
-
-	if (bPutMsgQuene(DEF_MSGFROM_LOGSERVER, pData, dwMsgSize, NULL, cKey) == FALSE) {
-		// The message queue is broken. Fatal error.
-		PutLogList("@@@@@@ CRITICAL ERROR in MsgQuene!!! @@@@@@");
-	}	
-}
-
 // v2.14 Changed to send the GM log to the world server.
 BOOL CGame::bSendMsgToLS(DWORD dwMsg, int iClientH, BOOL bFlag,char * pData)
 {
@@ -4210,6 +4117,12 @@ BOOL CGame::bSendMsgToLS(DWORD dwMsg, int iClientH, BOOL bFlag,char * pData)
  char    cGuildLoc[11], cTemp[120];
  int   * ip, iSendSize;
  
+
+	// WORLD-003: there is no log server any more. The player data, guild and log requests below are answered by
+	// the Login link from LOGIN-007 and the character work on; until then they are dropped. The bodies stay as the
+	// reference for the packets that work replaces.
+	hb::log::debug("log server request 0x{:08x} dropped (no log server link)", static_cast<unsigned>(dwMsg));
+	return FALSE;
 
 	/*
 	// Advance the sub-log-socket index for sending
@@ -14945,7 +14858,6 @@ void CGame::MsgProcess()
 				switch (*wpMsgType) {
 				case DEF_MSGTYPE_CONFIRM:
 					PutLogList("(!) Game Server registration to Gate Server - Success!");
-					m_bIsGateSockAvailable = TRUE;
 					break;
 
 				case DEF_MSGTYPE_REJECT:
@@ -15124,7 +15036,6 @@ void CGame::MsgProcess()
 				switch (*wpMsgType) {
 				case DEF_MSGTYPE_CONFIRM:
 					PutLogList("(!) Game Server registration to Log Server - Success!");
-					m_bIsLogSockAvailable = TRUE;
 					break;
 
 				case DEF_MSGTYPE_REJECT:
@@ -20541,85 +20452,6 @@ void CGame::ToggleCombatModeHandler(int iClientH)
 	
 }
 
-void CGame::OnGateSocketEvent(UINT message, WPARAM wParam, LPARAM lParam)
-{
- int   iRet;
-	
-	if (m_pGateSock == NULL) return;
-
-	iRet = m_pGateSock->iOnSocketEvent(wParam, lParam);
-
-	switch (iRet) {
-	case DEF_XSOCKEVENT_CONNECTIONESTABLISH:
-		// Connected to the gate server, so send the game server registration message.
-		PutLogList("(!!!) Gate-socket connected!");
-		SendMsgToGateServer(MSGID_REQUEST_REGISTERGAMESERVER, NULL);
-		// v1.41 Counter for reconnecting the gate-socket. If the gate-socket drops on a socket error while running, it reconnects at once,
-		// and when this passes a threshold the connection is treated as failed and the server enters auto shutdown mode (4).
-		m_iGateSockConnRetryTimes = 0;
-		break;
-	
-	case DEF_XSOCKEVENT_READCOMPLETE:
-		// A message was received.
-		OnGateRead();
-		break;
-	
-	case DEF_XSOCKEVENT_BLOCK:
-		break;
-	
-	case DEF_XSOCKEVENT_CONFIRMCODENOTMATCH:
-		// The confirm code does not match.
-	case DEF_XSOCKEVENT_MSGSIZETOOLARGE:
-		// The message to receive is larger than the buffer.	Must close.
-	case DEF_XSOCKEVENT_SOCKETERROR:
-		// Socket error.
-	case DEF_XSOCKEVENT_SOCKETCLOSED:
-		// Socket closed.
-		delete m_pGateSock;
-		m_pGateSock = NULL;
-		PutLogList("(!!!) Gate-socket connection lost!");
-		m_bIsGateSockAvailable = FALSE;
-
-		// v1.41 Try to reconnect to the Gate Server
-		// v2.17 2002-8-5 Tracking a memory leak
-		if (m_bOnExitProcess == FALSE) {
-			m_pGateSock = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-			m_pGateSock->bConnect(m_cGateServerAddr, m_iGateServerPort, WM_ONGATESOCKETEVENT);
-			m_pGateSock->bInitBufferSize(DEF_MSGBUFFERSIZE);
-			// v1.41 For checking the connect time
-			m_iGateSockConnRetryTimes = 1;
-
-			wsprintf(G_cTxt, "(!!!) Try to reconnect gate-socket... Addr:%s  Port:%d", m_cGateServerAddr, m_iGateServerPort);
-			PutLogList(G_cTxt);
-		}
-
-		/*
-		// The gate server connection is lost and cannot be recovered. Shut the server down automatically.
-		if (m_bOnExitProcess == FALSE) {
-			m_cShutDownCode      = 4;
-			m_bOnExitProcess     = TRUE;
-			m_dwExitProcessTime  = timeGetTime();
-			// Once the game server shutdown starts, further client connections are refused.
-			PutLogList("(!) GAME SERVER SHUTDOWN PROCESS STARTED(by gate-server connection Lost)!!!");
-		}
-		*/
-		break;
-	}
-}
-
-void CGame::OnGateRead()
-{
- DWORD dwMsgSize;
- char * pData, cKey;
-
-	pData = m_pGateSock->pGetRcvDataPointer(&dwMsgSize, &cKey);
-
-	if (bPutMsgQuene(DEF_MSGFROM_GATESERVER, pData, dwMsgSize, NULL, cKey) == FALSE) {
-		// The message queue is broken. Fatal error.
-		PutLogList("@@@@@@ CRITICAL ERROR in MsgQuene!!! @@@@@@");
-	}	
-}
-
 void CGame::SendMsgToGateServer(DWORD dwMsg, int iClientH, char * pData)
 {
  DWORD * dwp;
@@ -20627,10 +20459,9 @@ void CGame::SendMsgToGateServer(DWORD dwMsg, int iClientH, char * pData)
  int     iRet, i;
  char    cData[1000], cCharName[11], cAccountName[11], cAccountPassword[11], cAddress[16], cGuildName[21], cTxt[120], * cp;
 
-	if (m_pGateSock == NULL) {
-		PutLogList("(!) SendMsgToGateServer fail - Socket to Gate-Server not available.");
-		return;
-	}
+	// WORLD-003: there is no gate server any more. Party operations and the server stock messages went through
+	// it and nothing replaces them yet, so they are dropped.
+	if (m_pGateSock == NULL) return;
 
 	ZeroMemory(cData, sizeof(cData));
 	ZeroMemory(cCharName, sizeof(cCharName));
@@ -20711,7 +20542,7 @@ void CGame::SendMsgToGateServer(DWORD dwMsg, int iClientH, char * pData)
 	case MSGID_GAMESERVERALIVE:
 		// Send the game server info periodically
 		// If the log server socket dropped, send nothing, so the server's problem is noticed.
-		if (m_bIsLogSockAvailable == FALSE) return;
+		if (m_bIsLoginLinkAvailable == FALSE) return;
 		
 		dwp  = (DWORD *)(cData + DEF_INDEX4_MSGID);
 		*dwp = MSGID_GAMESERVERALIVE;
@@ -20736,7 +20567,6 @@ void CGame::SendMsgToGateServer(DWORD dwMsg, int iClientH, char * pData)
 		PutLogList("(***) Socket to Gate-Server crashed! Critical error!");
 		delete m_pGateSock;
 		m_pGateSock = NULL;
-		m_bIsGateSockAvailable = FALSE;
 
 		// v1.41 Try to reconnect to the Gate Server: this does not shut the server down.
 		// 2002-8-5 Tracking a memory leak
@@ -40750,8 +40580,8 @@ void CGame::_Manager_Init(int iClientH, char *  pData)
 	sp  = (short *)cp;
 	
 	if ((m_bIsGameStarted == TRUE) && (m_bIsItemAvailable == TRUE) && 
-			(m_bIsNpcAvailable == TRUE) && (m_bIsGateSockAvailable == TRUE) &&
-			(m_bIsLogSockAvailable == TRUE) && (m_bIsMagicAvailable == TRUE) &&
+			(m_bIsNpcAvailable == TRUE) && (m_bIsLoginLinkAvailable == TRUE) &&
+			(m_bIsMagicAvailable == TRUE) &&
 			(m_bIsSkillAvailable == TRUE) && (m_bIsPortionAvailable == TRUE) &&
 			(m_bIsQuestAvailable == TRUE)
 #ifdef DEF_DEFENCEHACKING
@@ -42387,86 +42217,10 @@ void CGame::_CheckStrategicPointOccupyStatus(char cMapIndex)
 	}
 }
 
-void CGame::OnSubLogSocketEvent(UINT message, WPARAM wParam, LPARAM lParam)
-{
- UINT iTmp;
- register int iLogSockH, iRet;
-
-	iTmp = (WM_ONLOGSOCKETEVENT + 1);
-	iLogSockH = message - iTmp;
-	
-	if (m_pSubLogSock[iLogSockH] == NULL) return;
-
-	iRet = m_pSubLogSock[iLogSockH]->iOnSocketEvent(wParam, lParam);
-
-	
-	switch (iRet) {
-	case DEF_XSOCKEVENT_CONNECTIONESTABLISH:
-		// Connected to the log server.
-		wsprintf(G_cTxt, "(!!!) Sub-log-socket(%d) connected.", iLogSockH);
-		PutLogList(G_cTxt);
-
-		m_bIsSubLogSockAvailable[iLogSockH] = TRUE;
-		m_iSubLogSockActiveCount++;
-		break;
-
-
-	case DEF_XSOCKEVENT_READCOMPLETE:
-		// A message was received.
-		OnSubLogRead(iLogSockH);
-		break;
-	
-	case DEF_XSOCKEVENT_BLOCK:
-//		wsprintf(G_cTxt, "(!!!) Sub-log-socket(%d) BLOCKED!", iLogSockH);
-//		PutLogList(G_cTxt);
-		break;
-	
-	case DEF_XSOCKEVENT_CONFIRMCODENOTMATCH:
-		// The confirm code does not match.
-	case DEF_XSOCKEVENT_MSGSIZETOOLARGE:
-		// The message to receive is larger than the buffer.	Must close.
-	case DEF_XSOCKEVENT_SOCKETERROR:
-		// Socket error.
-	case DEF_XSOCKEVENT_SOCKETCLOSED:
-		// Socket closed.
-		delete m_pSubLogSock[iLogSockH];
-		m_pSubLogSock[iLogSockH] = NULL;
-		m_bIsSubLogSockAvailable[iLogSockH] = FALSE;
-		
-		m_iSubLogSockFailCount++;
-		m_iSubLogSockActiveCount--;
-
-		wsprintf(G_cTxt, "(!!!) Sub-log-socket(%d) connection lost!", iLogSockH);
-		PutLogList(G_cTxt);
-		PutLogFileList(G_cTxt);
-		
-		m_pSubLogSock[iLogSockH] = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-		m_pSubLogSock[iLogSockH]->bConnect(m_cLogServerAddr, m_iLogServerPort, (WM_ONLOGSOCKETEVENT + iLogSockH + 1));
-		m_pSubLogSock[iLogSockH]->bInitBufferSize(DEF_MSGBUFFERSIZE);
-
-		wsprintf(G_cTxt, "(!!!) Try to reconnect sub-log-socket(%d)... Addr:%s  Port:%d", iLogSockH, m_cLogServerAddr, m_iLogServerPort);
-		PutLogList(G_cTxt);
-		
-		break;
-	}
-}
 
 
 
 
-
-void CGame::OnSubLogRead(int iIndex)
-{
- DWORD dwMsgSize;
- char * pData, cKey;
-
-	pData = m_pSubLogSock[iIndex]->pGetRcvDataPointer(&dwMsgSize, &cKey);
-
-	if (bPutMsgQuene(DEF_MSGFROM_LOGSERVER, pData, dwMsgSize, NULL, cKey) == FALSE) {
-		// The message queue is broken. Fatal error.
-		PutLogList("@@@@@@ CRITICAL ERROR in MsgQuene!!! @@@@@@");
-	}	
-}
 #ifdef DEF_TAIWANLOG
 BOOL CGame::_bItemLog(int iAction,int iGiveH, int iRecvH, class CItem * pItem,BOOL bForceItemLog)
 {
@@ -43091,30 +42845,6 @@ BOOL CGame::_bPKLog(int iAction,int iAttackerH , int iVictumH, char * pNPC)
 		}
 	bSendMsgToLS(MSGID_GAMEITEMLOG, iVictumH, NULL,cTxt);
 	return TRUE ;
-}
-
-void CGame::_CheckGateSockConnection()
-{
-	// No need to count if the server already shut down.
-	if (m_bIsServerShutdowned == TRUE) return;
-
-	if (m_iGateSockConnRetryTimes != 0) {
-		wsprintf(G_cTxt, "(!!!) Gate-socket connection counting...%d", m_iGateSockConnRetryTimes); 
-		PutLogList(G_cTxt);
-		m_iGateSockConnRetryTimes++;
-	}
-
-	// If the Gate-socket is not connected for 60 seconds, enter auto reboot mode.
-	if (m_iGateSockConnRetryTimes > 20) {
-		// The gate server connection is lost and cannot be recovered. Shut the server down automatically.
-		if (m_bOnExitProcess == FALSE) {
-			m_cShutDownCode      = 4;
-			m_bOnExitProcess     = TRUE;
-			m_dwExitProcessTime  = timeGetTime();
-			// Once the game server shutdown starts, further client connections are refused.
-			PutLogList("(!) GAME SERVER SHUTDOWN PROCESS BEGIN(by gate-server connection Lost)!!!");
-		}
-	}
 }
 
 BOOL CGame::_bCheckSubLogSocketIndex()
@@ -48995,8 +48725,8 @@ void CGame::CheckConnectionHandler(int iClientH, char *pData)
 		sp  = (short *)cp;
 		
 		if ((m_bIsGameStarted == TRUE) && (m_bIsItemAvailable == TRUE) && 
-				(m_bIsNpcAvailable == TRUE) && (m_bIsGateSockAvailable == TRUE) &&
-				(m_bIsLogSockAvailable == TRUE) && (m_bIsMagicAvailable == TRUE) &&
+				(m_bIsNpcAvailable == TRUE) && (m_bIsLoginLinkAvailable == TRUE) &&
+				(m_bIsMagicAvailable == TRUE) &&
 				(m_bIsSkillAvailable == TRUE) && (m_bIsPortionAvailable == TRUE) &&
 				(m_bIsQuestAvailable == TRUE)
 #ifdef DEF_DEFENCEHACKING

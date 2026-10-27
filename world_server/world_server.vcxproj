@@ -40,6 +40,10 @@
 		<IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
 		<TargetName>world_server</TargetName>
 	</PropertyGroup>
+	<PropertyGroup>
+		<!-- WORLD-003: Asio (vendored in shared/) for the Login link; only login_link.cpp and the shared net layer include it. -->
+		<ExternalIncludePath>$(SolutionDir)shared\third_party\asio\include;$(ExternalIncludePath)</ExternalIncludePath>
+	</PropertyGroup>
 	<ItemDefinitionGroup>
 		<ClCompile>
 			<!-- Legacy code: /W3 as in HGserver.dsp, warnings visible but not errors (WORLD-001 scope). -->
@@ -92,6 +96,53 @@
 			<ConformanceMode>true</ConformanceMode>
 		</ClCompile>
 		<ClCompile Include="src\legacy_log_files.cpp" />
+		<!-- WORLD-003: the game data the log server used to push, read from GameData\ (legacy game logic, legacy warnings). -->
+		<ClCompile Include="src\game_data_files.cpp" />
+		<!-- WORLD-003: world_server.json and the Login link. New code: strict warnings, conforming, no forced winsock2.h;
+		     Asio and the shared net layer stay out of the legacy translation units. -->
+		<ClCompile Include="src\world_config.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(SolutionDir)third_party\nlohmann_json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<ClCompile Include="src\login_link.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<!-- shared/net and shared/protocol: the one network implementation of all three programs. The object folder keeps
+		     shared/net/client.cpp apart from the game's Client.cpp (file names compare case-insensitively). -->
+		<ClCompile Include="..\shared\net\connection.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<ObjectFileName>$(IntDir)shared_net\</ObjectFileName>
+		</ClCompile>
+		<ClCompile Include="..\shared\net\client.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<ObjectFileName>$(IntDir)shared_net\</ObjectFileName>
+		</ClCompile>
+		<ClCompile Include="..\shared\protocol\frame_codec.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
 		<!-- shared/log (hb::log) builds as the Login server builds it: Level4, warnings as errors, conforming, no forced winsock2.h. -->
 		<ClCompile Include="..\shared\log\log.cpp">
 			<WarningLevel>Level4</WarningLevel>
@@ -173,6 +224,14 @@
 		<ClInclude Include="src\UserMessages.h" />
 		<ClInclude Include="src\Version.h" />
 		<ClInclude Include="src\platform_win32.h" />
+		<ClInclude Include="src\world_config.h" />
+		<ClInclude Include="src\login_link.h" />
+		<ClInclude Include="..\shared\net\asio_config.h" />
+		<ClInclude Include="..\shared\net\connection.h" />
+		<ClInclude Include="..\shared\net\client.h" />
+		<ClInclude Include="..\shared\net\periodic_timer.h" />
+		<ClInclude Include="..\shared\protocol\link_messages.h" />
+		<ClInclude Include="..\shared\protocol\message_codec.h" />
 		<ClInclude Include="..\shared\log\log.h" />
 		<ClInclude Include="..\shared\log\console.h" />
 		<ClInclude Include="src\XSocket.h" />

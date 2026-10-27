@@ -27,6 +27,24 @@
 		<ClCompile Include="src\legacy_log_files.cpp">
 			<Filter>source</Filter>
 		</ClCompile>
+		<ClCompile Include="src\game_data_files.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\world_config.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\login_link.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="..\shared\net\connection.cpp">
+			<Filter>shared</Filter>
+		</ClCompile>
+		<ClCompile Include="..\shared\net\client.cpp">
+			<Filter>shared</Filter>
+		</ClCompile>
+		<ClCompile Include="..\shared\protocol\frame_codec.cpp">
+			<Filter>shared</Filter>
+		</ClCompile>
 		<ClCompile Include="..\shared\log\log.cpp">
 			<Filter>shared</Filter>
 		</ClCompile>

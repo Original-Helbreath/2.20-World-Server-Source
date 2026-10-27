@@ -382,7 +382,6 @@ public:
 	void BuildItemHandler(int iClientH, char * pData);
 	BOOL _bDecodeBuildItemConfigFileContents(char * pData, DWORD dwMsgSize);
 	BOOL _bCheckSubLogSocketIndex();
-	void _CheckGateSockConnection();
 
 	BOOL _bItemLog(int iAction, int iGiveH, int iRecvH, class CItem * pItem, BOOL bForceItemLog = FALSE) ;
 	BOOL _bItemLog(int iAction, int iClientH, char * cName, class CItem * pItem);
@@ -390,8 +389,6 @@ public:
 	BOOL _bPKLog(int iAction, int iAttackerH, int iVictumH, char * cNPC) ;
 	BOOL _bCheckGoodItem( class CItem * pItem ); 
 
-	void OnSubLogRead(int iIndex);
-	void OnSubLogSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	void _CheckStrategicPointOccupyStatus(char cMapIndex);
 	void GetMapInitialPoint(int iMapIndex, short * pX, short * pY, char * pPlayerLocation = NULL);
 	void AdminOrder_SummonDemon(int iClientH);
@@ -578,8 +575,6 @@ public:
 	void PlayerMagicHandler(int iClientH, int dX, int dY, short sType, BOOL bItemEffect = FALSE, int iV1 = NULL);
 	int  iClientMotion_Magic_Handler(int iClientH, short sX, short sY, char cDir);
 	void SendMsgToGateServer(DWORD dwMsg, int iClientH, char * pData = NULL);
-	void OnGateRead();
-	void OnGateSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	void ToggleCombatModeHandler(int iClientH); 
 	void GuildNotifyHandler(char * pData, DWORD dwMsgSize);
 	void SendGuildMsg(int iClientH, WORD wNotifyMsgType, short sV1, short sV2, char * pString);
@@ -639,13 +634,12 @@ public:
 	// v2.17 2002-7-31 Allow creating items by their unique number.
 	BOOL _bInitItemAttr(class CItem * pItem, int iItemID);
 	BOOL bReadProgramConfigFile(char * cFn);
+	BOOL bLoadGameDataFiles();	// WORLD-003: game_data_files.cpp
 	void GameProcess();
 	void InitPlayerData(int iClientH, char * pData, DWORD dwSize);
 	void ResponsePlayerDataHandler(char * pData, DWORD dwSize);
 	// v2.14 Changed to send the GM log to the world server.
 	BOOL bSendMsgToLS(DWORD dwMsg, int iClientH, BOOL bFlag = TRUE,char * pData = NULL );
-	void OnMainLogRead();
-	void OnMainLogSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	void CheckClientResponseTime();
 	void OnTimer(char cType);
 	int iComposeMoveMapData(short sX, short sY, int iClientH, char cDir, char * pData);
@@ -711,7 +705,7 @@ public:
 	int				m_iGateSockConnRetryTimes;
 	class CMisc     m_Misc;
 	BOOL			m_bIsGameStarted;
-	BOOL            m_bIsLogSockAvailable, m_bIsGateSockAvailable;
+	BOOL            m_bIsLoginLinkAvailable;	// WORLD-003: the Login link is registered; replaces the log and gate socket flags
 	BOOL			m_bIsItemAvailable, m_bIsBuildItemAvailable, m_bIsNpcAvailable, m_bIsMagicAvailable;
 	BOOL			m_bIsSkillAvailable, m_bIsPortionAvailable, m_bIsQuestAvailable, m_bIsWLServerAvailable ;
 	class CItem   * m_pItemConfigList[DEF_MAXITEMTYPES];
