@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-// 헤더의 확인코드는 1바이트, 크기는 WORD로 변경되었음. 즉 헤더는 총 3바이트 
+// The header confirm code became 1 byte and the size a WORD, so the header is 3 bytes in total
 
 
 #if !defined(AFX_XSOCKET_H__F9D1BA42_7338_11D2_A8E6_00001C7030A6__INCLUDED_)
@@ -31,24 +31,24 @@
 #define DEF_XSOCKSTATUS_READINGHEADER	11
 #define DEF_XSOCKSTATUS_READINGBODY		12
 
-#define DEF_XSOCKEVENT_SOCKETMISMATCH			-121	// 소켓 이벤트와 소켓이 서로 다르다. (이런 경우가?)
-#define DEF_XSOCKEVENT_CONNECTIONESTABLISH		-122	// 접속이 이루어 졌다.
-#define DEF_XSOCKEVENT_RETRYINGCONNECTION		-123	// 접속을 다시 시도하는 중이다.
-#define DEF_XSOCKEVENT_ONREAD					-124	// 메시지를 읽는 중이다. 
-#define DEF_XSOCKEVENT_READCOMPLETE				-125	// 하나의 메시지를 완전히 수신했다.
-#define DEF_XSOCKEVENT_UNKNOWN					-126	// 알수없는 이벤트이다.
-#define DEF_XSOCKEVENT_SOCKETCLOSED				-127	// 소켓이 닫혔다. 
-#define DEF_XSOCKEVENT_BLOCK					-128	// 메시지를 보내다가 소켓이 블럭된 상태이다.
-#define DEF_XSOCKEVENT_SOCKETERROR				-129	// 소켓에 에러가 발생했다. 이경우 클래스를 삭제하여야 한다.
-#define DEF_XSOCKEVENT_CRITICALERROR			-130    // 치명적인 에러로 프로그램 전체가 멈춰야 한다.
-#define DEF_XSOCKEVENT_NOTINITIALIZED			-131	// 클래스가 초기화 되지 않은 상태로 사용됐다.
-#define DEF_XSOCKEVENT_MSGSIZETOOLARGE			-132	// 보내고자 하는 메시지의 사이즈가 너무 크다.
-#define DEF_XSOCKEVENT_CONFIRMCODENOTMATCH		-133	// 확인코드가 일치하지 않는다. 삭제되어야 한다.
-#define DEF_XSOCKEVENT_QUENEFULL                -134    // 블록 큐의 공간이 없다.
-#define DEF_XSOCKEVENT_UNSENTDATASENDBLOCK		-135    // 큐에 있는 데이터를 보내다가 또 블록이 걸렸다. 
-#define DEF_XSOCKEVENT_UNSENTDATASENDCOMPLETE	-136	// 큐에 있는 모든 데이터를 보냈다.
+#define DEF_XSOCKEVENT_SOCKETMISMATCH			-121	// The socket event and the socket differ. (can this happen?)
+#define DEF_XSOCKEVENT_CONNECTIONESTABLISH		-122	// Connected.
+#define DEF_XSOCKEVENT_RETRYINGCONNECTION		-123	// Retrying the connection.
+#define DEF_XSOCKEVENT_ONREAD					-124	// Reading a message.
+#define DEF_XSOCKEVENT_READCOMPLETE				-125	// Fully received one message.
+#define DEF_XSOCKEVENT_UNKNOWN					-126	// Unknown event.
+#define DEF_XSOCKEVENT_SOCKETCLOSED				-127	// Socket closed.
+#define DEF_XSOCKEVENT_BLOCK					-128	// The socket blocked while sending a message.
+#define DEF_XSOCKEVENT_SOCKETERROR				-129	// A socket error occurred. The class must be deleted.
+#define DEF_XSOCKEVENT_CRITICALERROR			-130    // A fatal error; the whole program must stop.
+#define DEF_XSOCKEVENT_NOTINITIALIZED			-131	// The class was used uninitialised.
+#define DEF_XSOCKEVENT_MSGSIZETOOLARGE			-132	// The message to send is too large.
+#define DEF_XSOCKEVENT_CONFIRMCODENOTMATCH		-133	// The confirm code does not match. Must be deleted.
+#define DEF_XSOCKEVENT_QUENEFULL                -134    // No space in the block queue.
+#define DEF_XSOCKEVENT_UNSENTDATASENDBLOCK		-135    // Blocked again while sending queued data.
+#define DEF_XSOCKEVENT_UNSENTDATASENDCOMPLETE	-136	// All queued data was sent.
 
-#define DEF_XSOCKBLOCKLIMIT						300		// 이 클래스 소켓은 ?번이상 블록되면 더이상 데이터를 저장할 수 없다. 	
+#define DEF_XSOCKBLOCKLIMIT						300		// After ? blocks this socket class cannot store more data.
 
 class XSocket  
 {
@@ -69,7 +69,7 @@ public:
 
 	int  m_WSAErr;
 	BOOL m_bIsAvailable;
-	BOOL m_bIsWriteEnabled; // 2001-11-27일 추가
+	BOOL m_bIsWriteEnabled; // Added 2001-11-27
 
 private:
 	void _CloseConn();

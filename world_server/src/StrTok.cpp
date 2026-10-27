@@ -38,13 +38,13 @@ char * CStrTok::pGet()
 		else cNextData = NULL;
 
 		if (_bIsSeperator(m_pData[m_iCurLoc], cNextData) == FALSE) {
-			// separator가 아니면 토큰을 작성  
+			// Build a token if not a separator
 			m_cToken[i] = m_pData[m_iCurLoc];
 			i++;
 			m_iCurLoc++;
 		}
 		else {
-			// 다음 토큰까지 포인터를 이동시킨후 토큰을 반환한다.
+			// Move the pointer to the next token, then return the token.
 			bFlag = FALSE;
 			while (bFlag == FALSE) {
 				if (m_iCurLoc <= (m_iDataLength - 2))

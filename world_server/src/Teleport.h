@@ -17,12 +17,12 @@ teleport = 2	William		cityhall_2	middleland	200	200	10000	30	100	elvine	1	1	0
 
 [END]
 
-Teleport 가능한 부류 설정
+Who can teleport
 
 Side   : all, aresden, elvine
-bHunt  : 사냥꾼도 가능한지		(0,1)
-bNtrl  : 중립도 가능한지		(0,1)
-bCrmnl : 범죄자도 가능한지		(0,1)
+bHunt  : whether hunters can		(0,1)
+bNtrl  : whether neutrals can		(0,1)
+bCrmnl : whether criminals can		(0,1)
 
 */
 

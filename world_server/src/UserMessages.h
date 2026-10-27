@@ -5,7 +5,7 @@
 #define WM_ONLOGSOCKETEVENT		WM_USER + 200
 #define WM_ONGATESOCKETEVENT	WM_USER + 1000
 
-// 클라이언트가 1100번 이하를 점유하므로 이 이후로 메시지가 정의되어서는 안된다. 
+// The client uses up to 1100, so no messages may be defined after this.
 #define WM_ONCLIENTSOCKETEVENT	WM_USER + 1100
 
 												 

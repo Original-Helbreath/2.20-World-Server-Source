@@ -55,7 +55,7 @@
  #define DEF_COMMONTYPE_GETMAGICABILITY			0x0A24
  #define DEF_COMMONTYPE_CLEARGUILDNAME			0x0A25
 
-// v1.4311-3 추가 메세지 선언 입장권 받기위한 메세지  길드에서 강퇴됨  DEF_COMMONTYPE_REQ_GETOCCUPYFIGHTZONETICKET DEF_COMMONTYPE_BANGUILD
+// v1.4311-3 Added messages: get an entry ticket, kicked from guild  DEF_COMMONTYPE_REQ_GETOCCUPYFIGHTZONETICKET DEF_COMMONTYPE_BANGUILD
  #define DEF_COMMONTYPE_REQ_GETOCCUPYFIGHTZONETICKET	0x0A25
  #define DEF_COMMONTYPE_BANGUILD						0x0A26
 
@@ -74,7 +74,7 @@
  #define DEF_COMMONTYPE_SETGUILDCONSTRUCTLOC			0x0A57
  #define DEF_COMMONTYPE_UPGRADEITEM						0x0A58
  #define DEF_COMMONTYPE_REQGUILDNAME					0x0A59 // v2.171 2002-6-14
- #define DEF_COMMONTYPE_REQUEST_HUNTMODE				0x0A60 // 2002-11-14 사냥꾼 모드 추가
+ #define DEF_COMMONTYPE_REQUEST_HUNTMODE				0x0A60 // 2002-11-14 Added hunter mode
  
 
  #define MSGID_NOTIFY						0x0FA314D0
@@ -184,7 +184,7 @@
  #define DEF_NOTIFY_DAMAGEMOVE						0x0B74
  #define DEF_NOTIFY_FORCEDISCONN					0x0B75
 
-// v1.4311-3 메세지 선언 선언 사투장 예약이 취소 및 길드 마스터 명령 사용권한이 없음을 알림
+// v1.4311-3 Declared messages: fight-zone reservation cancelled, and no right to use guild master commands
 // #define DEF_NOTIFY_SUCCESSBANGUILDMAN			0x0B82
  #define DEF_NOTIFY_FIGHTZONERESERVE				0x0B76
  #define DEF_NOTIFY_NOGUILDMASTERLEVEL				0x0B77
@@ -217,24 +217,24 @@
  #define DEF_NOTIFY_ITEMATTRIBUTECHANGE				0x0BA3
  #define DEF_NOTIFY_GIZONITEMUPGRADELEFT			0x0BA4
 
- // v2.15 지존아이템 업그레이드 (변경)
+ // v2.15 Supreme item upgrade (changed)
  #define DEF_NOTIFY_GIZONITEMCANGE					0x0BA5
  #define DEF_NOTIFY_REQGUILDNAMEANSWER				0x0BA6 // v2.171
 
  // v2.17 2002-7-15
  #define DEF_NOTIFY_FORCERECALLTIME					0x0BA7
 
- // v2.17 2002-7-21 아이템 업그레이드 실패 이유를 뿌려주기 위해
+ // v2.17 2002-7-21 To show why an item upgrade failed
  #define DEF_NOTIFY_ITEMUPGRADEFAIL					0x0BA8
 
- // 2002-11-14 사냥꾼 모드 추가
+ // 2002-11-14 Added hunter mode
  #define DEF_NOTIFY_RESPONSE_HUNTMODE				0x0BA9
- // 2002-12-3 몹 이벤트 위치 클라이언트에게 보내준다.
+ // 2002-12-3 Send the mob event location to the client.
  #define DEF_NOTIFY_MONSTEREVENT_POSITION			0x0BAA
- //v2.19 2002-12-16 농사 스킬 관련 :: 농작물 제한에 걸렷다..
- #define DEF_NOTIFY_NOMOREAGRICULTURE				0x0BB0  //? 농작물 제한
- #define DEF_NOTIFY_AGRICULTURESKILLLIMIT			0x0BB1  //? 스킬 제한
- #define DEF_NOTIFY_AGRICULTURENOAREA				0x0BB2  //? 농작물을 지을수 있는 공간이 아니다.
+ //v2.19 2002-12-16 Farming skill :: the crop limit applies..
+ #define DEF_NOTIFY_NOMOREAGRICULTURE				0x0BB0  //? Crop limit
+ #define DEF_NOTIFY_AGRICULTURESKILLLIMIT			0x0BB1  //? Skill limit
+ #define DEF_NOTIFY_AGRICULTURENOAREA				0x0BB2  //? Not a space where crops can be planted.
 
 #define MSGID_ITEMCONFIGURATIONCONTENTS			0x0FA314D9
 #define MSGID_NPCCONFIGURATIONCONTENTS			0x0FA314DA
@@ -247,10 +247,10 @@
 #define MSGID_BUILDITEMCONFIGURATIONCONTENTS	0x0FA40002	
 #define MSGID_DUPITEMIDFILECONTENTS				0x0FA40003
 #define MSGID_NOTICEMENTFILECONTENTS			0x0FA40004
-#define MSGID_WORLDCONFIGCONTENTS				0x0FA40005 // v2.15 관리 프로그램 IP 주소 설정을 위해서 2002-5-21
-#define MSGID_NPCITEMCONFIGCONTENTS				0x0FA40006 // 2002-8-7  NPC에서 아이템이 나오는 확률을 config 파일로 설정할 수 있도록 하기 위해 
-#define MSGID_WLSERVERFILECONTENTS				0x0FA40007 // 2002-12-8 World server 보안 설정을 위해 
-#define MSGID_TELEPORTLISTCONTENTS				0x0FA40008 // 2002-12-6  Teleport 기능 추가
+#define MSGID_WORLDCONFIGCONTENTS				0x0FA40005 // v2.15 For setting the management program IP address 2002-5-21
+#define MSGID_NPCITEMCONFIGCONTENTS				0x0FA40006 // 2002-8-7  So NPC item drop chances can be set in a config file
+#define MSGID_WLSERVERFILECONTENTS				0x0FA40007 // 2002-12-8 For World server security settings
+#define MSGID_TELEPORTLISTCONTENTS				0x0FA40008 // 2002-12-6  Added the Teleport feature
 
 
 #define MSGID_COMMAND_CHECKCONNECTION		0x03203203
@@ -266,7 +266,7 @@
 
 #define MSGID_REQUEST_LOGIN					0x0FC94201
 #define MSGID_REQUEST_CREATENEWACCOUNT		0x0FC94202
-#define MSGID_RESPONSE_LOG					0x0FC94203	// Login, createnewaccount, createnewcharacter, deletecharacter 등등에 대한 응답 
+#define MSGID_RESPONSE_LOG					0x0FC94203	// Responses to Login, createnewaccount, createnewcharacter, deletecharacter and so on
 #define MSGID_REQUEST_CREATENEWCHARACTER	0x0FC94204
 #define MSGID_REQUEST_ENTERGAME				0x0FC94205
 #define MSGID_RESPONSE_ENTERGAME			0x0FC94206
@@ -285,7 +285,7 @@
 #define MSGID_REQUEST_CHANGEPASSWORD		0x0FC94210
 #define MSGID_RESPONSE_CHANGEPASSWORD		0x0FC94211
 
-// v2.15 상하추가 중국 키코드용 define 추가
+// v2.15 Added defines for Chinese key codes
 #define MSGID_REQUEST_INPUTKEYCODE			0x0FC94212
 #define MSGID_RESPONSE_INPUTKEYCODE			0x0FC94213
 
@@ -308,13 +308,13 @@
  
 #define DEF_LOGRESMSGTYPE_INPUTKEYCODEFAILED			0x0A03		
  
-// 게임 접근시 옵션 
+// Game access option
  #define DEF_ENTERGAMEMSGTYPE_NEW						0x0F1C
  #define DEF_ENTERGAMEMSGTYPE_NOENTER_FORCEDISCONN		0x0F1D
  #define DEF_ENTERGAMEMSGTYPE_CHANGINGSERVER			0x0F1E
  #define DEF_ENTERGAMEMSGTYPE_NEW_TOWLSBUTMLS			0x0F1F
 
-// 게임 접근 결과 
+// Game access result
  #define DEF_ENTERGAMERESTYPE_PLAYING			0x0F20
  #define DEF_ENTERGAMERESTYPE_REJECT			0x0F21
  #define DEF_ENTERGAMERESTYPE_CONFIRM			0x0F22
@@ -324,7 +324,7 @@
 #define MSGID_RESPONSE_PLAYERDATA			0x0C152211
 #define MSGID_RESPONSE_SAVEPLAYERDATA_REPLY	0x0C152212
 #define MSGID_REQUEST_SAVEPLAYERDATA		0x0DF3076F
-#define MSGID_REQUEST_SAVEPLAYERDATA_REPLY	0x0DF30770	// 로그서버로부터 세이브됨의 응답을 받아야 하는 경우 
+#define MSGID_REQUEST_SAVEPLAYERDATA_REPLY	0x0DF30770	// When the saved reply from the log server is needed
 #define MSGID_REQUEST_SAVEPLAYERDATALOGOUT	0x0DF3074F
 #define MSGID_REQUEST_NOSAVELOGOUT			0x0DF30750
 
@@ -334,13 +334,13 @@
 
 #define MSGID_REQUEST_FULLOBJECTDATA		0x0DF40000
 
-// 로그서버에서 게임서버로 통보하는 메시지 
+// Messages the log server sends to the game server
 #define MSGID_GUILDNOTIFY					0x0DF30760
 #define DEF_GUILDNOTIFY_NEWGUILDSMAN		0x1F00
 
-// 텔레포트 
+// Teleport
 #define MSGID_REQUEST_TELEPORT				0x0EA03201
-// 2002-12-6  Teleport 기능 추가 (Message 추가)
+// 2002-12-6  Added the Teleport feature (messages added)
 #define MSGID_REQUEST_TELEPORT_LIST			0x0EA03202
 #define MSGID_RESPONSE_TELEPORT_LIST		0x0EA03203
 #define MSGID_REQUEST_CHARGED_TELEPORT		0x0EA03204
@@ -358,7 +358,7 @@
 
 #define MSGID_ENTERGAMECONFIRM				0x12A01006
 
-// v1.4311-3 선언 사투장 예약 관련 메세지 
+// v1.4311-3 Declared fight-zone reservation messages
 #define MSGID_REQUEST_FIGHTZONE_RESERVE		0x12A01007
 #define MSGID_RESPONSE_FIGHTZONE_RESERVE	0x12A01008
 
@@ -392,7 +392,7 @@
 #define MSGID_BWM_INIT							0x19CC0F82
 #define MSGID_BWM_COMMAND_SHUTUP				0x19CC0F84
 
-// v2.15 관리 프로그램 2002-5-6
+// v2.15 Management program 2002-5-6
 #define MSGID_MANAGER_INIT						0x19CC0F85
 #define MSGID_MANAGER_SHUTDOWN  				0x19CC0F86
 
@@ -449,7 +449,7 @@
 #define MSGID_GATEWAY_CURRENTCONN					0x3B000000
 #define MSGID_GETMINIMUMLOADGATEWAY					0x3B1890EA
 
-// Gate-Server간 전달 내용
+// Gate-Server messages
 #define GSM_REQUEST_FINDCHARACTER					0x01
 #define GSM_RESPONSE_FINDCHARACTER					0x02
 #define GSM_GRANDMAGICRESULT						0x03

@@ -25,10 +25,10 @@ public:
 	short m_sDestX2, m_sDestY2;
 
 	int   m_iV1;			// Guild ID
-	int	  m_iV2;			// 전면전시 소환된 건물 수
+	int	  m_iV2;			// Buildings summoned in all-out war
 
-	// 2002-12-24 전면전시 소환할 수 있는 (건물 수를 제외한) NPC의 수를 제한한다.(대만 요청)
-	int   m_iNumSummonNpc;	// 전면전시 소환된 NPC 수 (건물수는 제외한 것이다.)
+	// 2002-12-24 Limit the NPCs (excluding buildings) that can be summoned in all-out war. (Taiwan request)
+	int   m_iNumSummonNpc;	// NPCs summoned in all-out war (buildings excluded.)
 
 	DWORD m_dwTime, m_dwTime2;
 

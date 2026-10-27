@@ -66,9 +66,9 @@ public:
 	void SetTempMoveAllowedFlag(int dX, int dY, BOOL bFlag);
 	int iAnalyze(char cType, int *pX, int *pY, int * pV1, int *pV2, int * pV3);
 	BOOL bGetIsWater(short dX, short dY);
-	BOOL bGetIsFarm(short dX, short dY);	//v2.19 2002-12-16 농사 스킬 관련
-	BOOL bAddCropsTotalSum();				//v2.19 2002-12-16 농사 스킬 관련
-	BOOL bRemoveCropsTotalSum();			//v2.19 2002-12-16 농사 스킬 관련
+	BOOL bGetIsFarm(short dX, short dY);	//v2.19 2002-12-16 Farming skill
+	BOOL bAddCropsTotalSum();				//v2.19 2002-12-16 Farming skill
+	BOOL bRemoveCropsTotalSum();			//v2.19 2002-12-16 Farming skill
 	void GetDeadOwner(short * pOwner, char * pOwnerClass, short sX, short sY);
 	BOOL bGetIsMoveAllowedTile(short dX, short dY);
 	void SetNamingValueEmpty(int iValue);
@@ -107,17 +107,17 @@ public:
 	int   m_iTotalAliveObject;
 	int   m_iMaximumObject;
 
-	char  m_cType;				// 맵의 형식. 0이면 보통. 1이면 공격행위가 범죄가 아니다.
+	char  m_cType;				// Map type. 0 normal. 1 means attacking is not a crime.
 
-	BOOL  m_bIsFixedDayMode;	// 항상 주간모드인지: 건물 내부 등 
-	BOOL  m_bIsFixedSnowMode;	// 항상 눈내리는 모드인지 (icebound,X-Mas)
+	BOOL  m_bIsFixedDayMode;	// Whether always day mode: building interiors etc.
+	BOOL  m_bIsFixedSnowMode;	// Whether always snowing (icebound, X-Mas)
 
 	struct {		    
 		BOOL bDefined;
 		char cType;				// 1:RANDOMAREA   2:RANDOMWAYPOINT
 		
-		char cWaypoint[10];     // RANDOMWAYPOINT 등
-		RECT rcRect;			// RANDOMAREA발생의 경우 
+		char cWaypoint[10];     // RANDOMWAYPOINT etc.
+		RECT rcRect;			// For RANDOMAREA spawns
 		
 		int  iTotalActiveMob;
 		int  iMobType;
@@ -138,11 +138,11 @@ public:
 	POINT m_MineralPointList[DEF_MAXMINERALPOINT];
 	int   m_iTotalMineralPoint, m_iMaxMineral, m_iCurMineral;
 
-	char  m_cWhetherStatus;		// 기상 상태. 0이면 없음. 1~3 비 4~6 눈 7~9 폭풍 
-	DWORD m_dwWhetherLastTime, m_dwWhetherStartTime;  // 날씨 지속, 시작 시간 
+	char  m_cWhetherStatus;		// Weather. 0 none. 1~3 rain 4~6 snow 7~9 storm
+	DWORD m_dwWhetherLastTime, m_dwWhetherStartTime;  // Weather duration and start time
 
 	int   m_iLevelLimit;
-	int   m_iUpperLevelLimit;	// 상위 렙 제한 
+	int   m_iUpperLevelLimit;	// Upper level limit
 
 	class COccupyFlag * m_pOccupyFlag[DEF_MAXOCCUPYFLAG];
 	int   m_iTotalOccupyFlags;
@@ -170,7 +170,7 @@ public:
 	BOOL m_bIsEnergySphereGoalEnabled;
 	int m_iCurEnergySphereGoalPointIndex; 
 
-	// 현재 맵에서의 플레이어들의 활동 성향을 파악하는 테이블.
+	// Table that tracks player activity on the current map.
 	struct {
 		int iPlayerActivity;
 		int iNeutralActivity;
@@ -194,27 +194,27 @@ public:
 	} m_stStrikePoint[DEF_MAXSTRIKEPOINTS];
 	int m_iTotalStrikePoints;
 
-	BOOL m_bIsDisabled;		// 폭격으로 기능이 마비된 경우 
+	BOOL m_bIsDisabled;		// When disabled by bombardment
 
 	struct {
-		char cType;			// 이게 NULL이면 정의되지 않은것을 의미.
-		char cSide;			// 사이드
-		short sX, sY;		// 설치된 위치 
+		char cType;			// NULL means not defined.
+		char cSide;			// Side
+		short sX, sY;		// Placed position
 	} m_stCrusadeStructureInfo[DEF_MAXCRUSADESTRUCTURES];
 	int m_iTotalCrusadeStructures;
-	int m_iTotalAgriculture;  //v2.19 2002-12-16 농사 스킬:: 작물 갯수...
+	int m_iTotalAgriculture;  //v2.19 2002-12-16 Farming skill:: crop count...
 
-	// 2.04 아이템 이벤트용 정보
-	// 2.18 아이템 이벤트 수정
-	// item-event = 	1	적색소원구	0	1	10		11	1	Cannibal-Plant Ettin EOL
+	// 2.04 Item event info
+	// 2.18 Item event change
+	// item-event = 	1	RedWishOrb	0	1	10		11	1	Cannibal-Plant Ettin EOL
 	struct {
-		char cItemName[21];	// 아이템 ID번호
-		int iAmount;		// 아이템 개수: 수량단위 아이템일 경우에 적용됨.
-		int iTotalNum;		// 하루동안 풀릴 아이템 총 물량 
-		int iMonth;			// 아이템 이벤트 날짜 
+		char cItemName[21];	// Item ID number
+		int iAmount;		// Item count: applies to quantity items.
+		int iTotalNum;		// Total items released per day
+		int iMonth;			// Item event date
 		int iDay;
-		int iType;			// 종류
-		char *cMob[5];		// 최대 몬스터 수는 5마리
+		int iType;			// Type
+		char *cMob[5];		// At most 5 monsters
 
 		int iCurNum;
 		int	iNumMob;
@@ -223,7 +223,7 @@ public:
 
 	BOOL m_bIsEnergySphereAutoCreation;
 
-	short sMobEventAmount ;         // 2002-7-4 맵에서 몹이벤트 양을 수정할 수 있게 
+	short sMobEventAmount ;         // 2002-7-4 So the map can change the mob event amount
 
 	
 private:

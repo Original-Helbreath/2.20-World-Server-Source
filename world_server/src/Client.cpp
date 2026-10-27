@@ -35,7 +35,7 @@ CClient::CClient(HWND hWnd)
 
 	m_cLU_Str = m_cLU_Int = m_cLU_Vit = m_cLU_Dex = m_cLU_Mag = m_cLU_Char = 0;
 
-	// v1.432 사용하지 않는다.
+	// v1.432 Not used.
 	//m_iHitRatio_ItemEffect_SM = 0;
 	//m_iHitRatio_ItemEffect_L  = 0;
 
@@ -46,25 +46,25 @@ CClient::CClient(HWND hWnd)
 
 	m_bIsSafeAttackMode  = FALSE;
 
-	// 아이템 장착 상태 초기화한 후 설정한다.
+	// Reset the item equip state, then set it.
 	for (i = 0; i < DEF_MAXITEMEQUIPPOS; i++) 
 		m_sItemEquipmentStatus[i] = -1;
 	
-	// 아이템 리스트 초기화 
+	// Reset the item list
 	for (i = 0; i < DEF_MAXITEMS; i++) {
 		m_pItemList[i]       = NULL;
 		m_ItemPosList[i].x   = 40;
 		m_ItemPosList[i].y   = 30;
 		m_bIsItemEquipped[i] = FALSE;
 	}
-	m_cArrowIndex = -1;	// 화살 아이템 인덱스는 할당되지 않은 상태 
+	m_cArrowIndex = -1;	// Arrow item index not yet assigned
 
-	// 맡겨논 아이템 리스트 초기화.
+	// Reset the banked item list.
 	for (i = 0; i < DEF_MAXBANKITEMS; i++) {
 		m_pItemInBankList[i] = NULL;
 	}
 
-	// Magic - Skill 숙련도 리스트 초기화 
+	// Reset the Magic - Skill mastery list
 	for (i = 0; i < DEF_MAXMAGICTYPE; i++)
 		m_cMagicMastery[i] = NULL;
 	
@@ -96,14 +96,14 @@ CClient::CClient(HWND hWnd)
 	m_cHairColor  = 0;
 	m_cUnderwear  = 0;
 
-	m_cAttackDiceThrow_SM = 0;	// 공격치 주사위 던지는 회수 @@@@@@@@@@@@@
+	m_cAttackDiceThrow_SM = 0;	// Number of attack dice thrown @@@@@@@@@@@@@
 	m_cAttackDiceRange_SM = 0;
-	m_cAttackDiceThrow_L = 0;	// 공격치 주사위 던지는 회수 @@@@@@@@@@@@@
+	m_cAttackDiceThrow_L = 0;	// Number of attack dice thrown @@@@@@@@@@@@@
 	m_cAttackDiceRange_L = 0;
 	m_cAttackBonus_SM    = 0;
 	m_cAttackBonus_L     = 0;
 	
-	// 플레이어의 소속 마을에 따라서 사이드가 결정되며 이것을 보고 NPC가 공격여부를 결정할 것이다. 
+	// The side follows the player's home town; NPCs use it to decide whether to attack.
 	m_cSide = 0;
 
 	m_iHitRatio = 0;
@@ -112,7 +112,7 @@ CClient::CClient(HWND hWnd)
 	for (i = 0; i < DEF_MAXITEMEQUIPPOS; i++) m_iDamageAbsorption_Armor[i]  = 0;
 	m_iDamageAbsorption_Shield = 0;
 
-	// v2.20 2002-12-28 3주년 기념반지 버그 수정 
+	// v2.20 2002-12-28 Fixed the 3rd anniversary ring bug
 	m_iHPstock = 0;
 	m_iHPStatic_stock = 0 ;
 
@@ -124,7 +124,7 @@ CClient::CClient(HWND hWnd)
 	m_iWhisperPlayerIndex = -1;
 	ZeroMemory(m_cWhisperPlayerName, sizeof(m_cWhisperPlayerName));
 	
-	m_iHungerStatus  = 100;  // 최대값은 100
+	m_iHungerStatus  = 100;  // Maximum value is 100
 	
 	m_bIsWarLocation = FALSE;
 	
@@ -151,7 +151,7 @@ CClient::CClient(HWND hWnd)
 	m_iSuperAttackLeft  = 0;
 	m_iSuperAttackCount = 0;
 
-	m_sUsingWeaponSkill = 5; // 기본적으로 맨손격투 
+	m_sUsingWeaponSkill = 5; // Bare-handed fighting by default
 
 	m_iManaSaveRatio   = 0;
 	m_iAddResistMagic  = 0;
@@ -160,7 +160,7 @@ CClient::CClient(HWND hWnd)
 	m_bIsLuckyEffect     = FALSE;
 	m_iSideEffect_MaxHPdown = 0;
 
-	m_iAddAbsAir   = 0;	// 속성별 대미지 흡수
+	m_iAddAbsAir   = 0;	// Damage absorption per attribute
 	m_iAddAbsEarth = 0;
 	m_iAddAbsFire  = 0;
 	m_iAddAbsWater = 0;
@@ -185,47 +185,47 @@ CClient::CClient(HWND hWnd)
 	m_bIsBWMonitor    = FALSE;
 	m_bIsExchangeMode = FALSE;
 
-	// v1.4311-3 추가 변수 초기화 사투장 예약 관련 변수 
+	// v1.4311-3 Reset the added fight-zone reservation variables
     m_iFightZoneTicketNumber =	m_iFightzoneNumber = m_iReserveTime = 0 ;            
 
 	m_iPenaltyBlockYear = m_iPenaltyBlockMonth = m_iPenaltyBlockDay = 0; // v1.4
 
-	m_iExchangeH = NULL;											// 교환할 대상의 인덱스 
-	ZeroMemory(m_cExchangeName, sizeof(m_cExchangeName));			// 교환할 대상의 이름 
-	ZeroMemory(m_cExchangeItemName, sizeof(m_cExchangeItemName));	// 교환할 아이템 이름 
+	m_iExchangeH = NULL;											// Index of the trade partner
+	ZeroMemory(m_cExchangeName, sizeof(m_cExchangeName));			// Name of the trade partner
+	ZeroMemory(m_cExchangeItemName, sizeof(m_cExchangeItemName));	// Name of the item to trade
 
-	m_cExchangeItemIndex  = -1; // 교환할 아이템 인덱스 
-	m_iExchangeItemAmount = 0;  // 교환할 아이템 갯수 
+	m_cExchangeItemIndex  = -1; // Index of the item to trade
+	m_iExchangeItemAmount = 0;  // Count of the item to trade
 
 	m_bIsExchangeConfirm = FALSE;
 
-	m_iQuest		 = NULL; // 현재 할당된 Quest 
+	m_iQuest		 = NULL; // Currently assigned quest
 	m_iQuestID       = NULL; // QuestID
-	m_iAskedQuest	 = NULL; // 물어본 퀘스트 
-	m_iCurQuestCount = NULL; // 현재 퀘스트 상태 
+	m_iAskedQuest	 = NULL; // Quest asked about
+	m_iCurQuestCount = NULL; // Current quest state
 
-	m_iQuestRewardType	 = NULL; // 퀘스트 해결시 상품 종류 -> 아이템의 ID값이다.
-	m_iQuestRewardAmount = NULL; // 상품 갯수 
+	m_iQuestRewardType	 = NULL; // Reward type on quest completion -> the item ID.
+	m_iQuestRewardAmount = NULL; // Reward count
 
-	m_iContribution = NULL;			// 공헌도 
-	m_bQuestMatchFlag_Loc = FALSE;  // 퀘스트 장소 확인용 플래그.
+	m_iContribution = NULL;			// Contribution
+	m_bQuestMatchFlag_Loc = FALSE;  // Flag for checking the quest location.
 	m_bIsQuestCompleted   = FALSE;
 
 	m_bIsNeutral      = FALSE;
 	m_bIsObserverMode = FALSE;
 
-	// 2000.8.1 이벤트 상품 수여 확인용 
+	// 2000.8.1 for checking the event reward was given
 	m_iSpecialEventID = 200081;
 
-	m_iSpecialWeaponEffectType  = 0;	// 희귀 아이템 효과 종류: 0-None 1-필살기대미지추가 2-중독효과 3-정의의 4-저주의
-	m_iSpecialWeaponEffectValue = 0;	// 희귀 아이템 효과 값
+	m_iSpecialWeaponEffectType  = 0;	// Rare item effect type: 0-None 1-extra critical damage 2-poison 3-righteous 4-cursed
+	m_iSpecialWeaponEffectValue = 0;	// Rare item effect value
 
 	m_iAddHP = m_iAddSP = m_iAddMP = 0; 
 	m_iAddAR = m_iAddPR = m_iAddDR = 0;
 	m_iAddAbsPD = m_iAddAbsMD = 0;
 	m_iAddCD = m_iAddExp = m_iAddGold = 0;
 		
-	m_iSpecialAbilityTime = DEF_SPECABLTYTIMESEC;		// DEF_SPECABLTYTIMESEC 초마다 한번씩 특수 능력을 쓸 수 있다.
+	m_iSpecialAbilityTime = DEF_SPECABLTYTIMESEC;		// The special ability can be used once every DEF_SPECABLTYTIMESEC seconds.
 	m_iSpecialAbilityType = NULL;
 	m_bIsSpecialAbilityEnabled = FALSE;
 	m_iSpecialAbilityLastSec   = 0;
@@ -238,7 +238,7 @@ CClient::CClient(HWND hWnd)
 	m_iSkillMsgRecvCount  = 0;
 
 	m_bIsAdminCreateItemEnabled = FALSE;
-	m_bIsAdminCommandEnabled = FALSE;   // v2.18 2002-10-15 중요 GM 명령어에 패스워드 추가 
+	m_bIsAdminCommandEnabled = FALSE;   // v2.18 2002-10-15 Added a password to important GM commands
 	m_iAlterItemDropIndex = -1;
 
 	m_iAutoExpAmount = 0;
@@ -284,7 +284,7 @@ CClient::CClient(HWND hWnd)
 	m_dwLastActionTime = NULL;
 	m_bIsCheckingWhisperPlayer = FALSE;
 
-	// v2.13 성후니 추가 DB 부하를 줄이기 위한 변수
+	// v2.13 Added to reduce DB load
 	m_bIsBankModified = FALSE ;
 
 	m_iGizonItemUpgradeLeft = 0;
@@ -293,10 +293,10 @@ CClient::CClient(HWND hWnd)
 	m_bIsMoveBlocked = FALSE; // v2.171
 	m_bIsAttackModeChange = FALSE; // v2.172 2002-7-2
 	m_iIsOnTown = FALSE;
-	m_bIsOnShop = FALSE ; // v2.182 2002-11-15 사고 팔수 있는 곳인지 체크하는 변수 추가 
-	m_bIsOnTower = FALSE ; // v2.20 2002-12-23 마법을 배울수 있는곳인지 체크 한다.
-	m_bIsOnWarehouse = FALSE ; // v2.20 2002-12-23 창고인지 체크 한다.
-	m_bIsHunter = FALSE ; // v2.182 2002-11-15 사냥군인지 체크하는 변수 추가 
+	m_bIsOnShop = FALSE ; // v2.182 2002-11-15 Added a variable that checks whether this is a place to buy and sell
+	m_bIsOnTower = FALSE ; // v2.20 2002-12-23 Checks whether magic can be learned here.
+	m_bIsOnWarehouse = FALSE ; // v2.20 2002-12-23 Checks whether this is a warehouse.
+	m_bIsHunter = FALSE ; // v2.182 2002-11-15 Added a variable that checks whether the player is a hunter
 	m_dwWarmEffectTime = NULL; // v2.172 
 	m_bIsInBuilding = FALSE ;
 }

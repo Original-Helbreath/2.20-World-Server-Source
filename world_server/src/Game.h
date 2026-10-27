@@ -56,48 +56,48 @@
 #define DEF_MAXITEMTYPES		5000
 #define DEF_MAXNPCTYPES			100
 #define DEF_MAXBUILDITEMS		300
-#define DEF_CLIENTTIMEOUT		1000*10		//(10초)
-#define DEF_AUTOSAVETIME		60000*30	// 자동 저장 시간간격 30분 
-#define DEF_HPUPTIME			1000*15		// HP가 올라가는 시간간격 
-#define DEF_MPUPTIME			1000*20		// MP가 올라가는 시간간격 
-#define DEF_SPUPTIME			1000*10		// SP가 올라가는 시간간격 
+#define DEF_CLIENTTIMEOUT		1000*10		//(10 seconds)
+#define DEF_AUTOSAVETIME		60000*30	// Auto-save interval 30 minutes
+#define DEF_HPUPTIME			1000*15		// HP regeneration interval
+#define DEF_MPUPTIME			1000*20		// MP regeneration interval
+#define DEF_SPUPTIME			1000*10		// SP regeneration interval
 
-#define DEF_HUNGERTIME			1000*60		// 배가 고파지는 시간간격 
-#define DEF_POISONTIME			1000*12		// 중독 효과 시간 간격 
-#define DEF_SUMMONTIME			60000*5		// 소환몹은 5분간 살아있다
-#define DEF_NOTICETIME			80000		// 공지 사항 전송 시간간격 
-#define DEF_PLANTTIME			60000*5		//v2.20 2002-12-20 농작물 살아 있는 시간.
+#define DEF_HUNGERTIME			1000*60		// Hunger interval
+#define DEF_POISONTIME			1000*12		// Poison effect interval
+#define DEF_SUMMONTIME			60000*5		// Summoned mobs live 5 minutes
+#define DEF_NOTICETIME			80000		// Notice send interval
+#define DEF_PLANTTIME			60000*5		//v2.20 2002-12-20 Crop lifetime.
 
-#define DEF_EXPSTOCKTIME		1000*10		// ExpStock을 계산하는 시간 간격 
-#define DEF_MSGQUENESIZE		100000		// 메시지 큐 사이즈 10만개 
-#define DEF_AUTOEXPTIME			1000*60*6	// 자동으로 경험치가 올라가는 시간간격 
-#define DEF_TOTALLEVELUPPOINT	3			// 레벨업시 할당하는 총 포인트 수 
+#define DEF_EXPSTOCKTIME		1000*10		// ExpStock calculation interval
+#define DEF_MSGQUENESIZE		100000		// Message queue size 100,000
+#define DEF_AUTOEXPTIME			1000*60*6	// Automatic experience interval
+#define DEF_TOTALLEVELUPPOINT	3			// Total points granted on level-up
 
 
 #define DEF_MAXDYNAMICOBJECTS	60000
 #define DEF_MAXDELAYEVENTS		60000
 #define DEF_GUILDSTARTRANK		12
 
-#define DEF_SSN_LIMIT_MULTIPLY_VALUE	2	// SSN-limit 곱하는 수 
+#define DEF_SSN_LIMIT_MULTIPLY_VALUE	2	// SSN-limit multiplier
 
-#define DEF_MAXNOTIFYMSGS		1000		// 최대 공지사항 메시지 
-#define DEF_MAXSKILLPOINTS		700			// 스킬 포인트의 총합 
+#define DEF_MAXNOTIFYMSGS		1000		// Max notice messages
+#define DEF_MAXSKILLPOINTS		700			// Skill point total
 #define DEF_NIGHTTIME			40
 
-#define DEF_CHARPOINTLIMIT		200			// 각각의 특성치의 최대값 
-#define DEF_RAGPROTECTIONTIME	7000		// 몇 초 이상 지나면 랙으로 부터 보호를 받는지 
-#define DEF_MAXREWARDGOLD		99999999	// 포상금 최대치 
+#define DEF_CHARPOINTLIMIT		200			// Maximum of each stat
+#define DEF_RAGPROTECTIONTIME	7000		// Seconds after which lag protection applies
+#define DEF_MAXREWARDGOLD		99999999	// Reward maximum
 
-#define DEF_ATTACKAI_NORMAL				1	// 무조건 공격 
-#define DEF_ATTACKAI_EXCHANGEATTACK		2	// 교환 공격 - 후퇴 
-#define DEF_ATTACKAI_TWOBYONEATTACK		3	// 2-1 공격, 후퇴 
+#define DEF_ATTACKAI_NORMAL				1	// Always attack
+#define DEF_ATTACKAI_EXCHANGEATTACK		2	// Alternate attack - retreat
+#define DEF_ATTACKAI_TWOBYONEATTACK		3	// 2-1 attack, retreat
 
 #define DEF_MAXFISHS					200
 #define DEF_MAXMINERALS					200
-#define DEF_MAXENGAGINGFISH				30  // 한 물고기에 낚시를 시도할 수 있는 최대 인원 
-#define DEF_MAXPORTIONTYPES				500 // 최대 포션 정의 갯수 
+#define DEF_MAXENGAGINGFISH				30  // Max people fishing for one fish
+#define DEF_MAXPORTIONTYPES				500 // Max potion definitions
 
-#define DEF_MOBEVENTTIME				300000 // 5분 
+#define DEF_MOBEVENTTIME				300000 // 5 minutes
 #define DEF_MAXQUESTTYPE				200
 
 #define DEF_MAXSUBLOGSOCK				10
@@ -108,7 +108,7 @@
 #define DEF_ITEMLOG_DEPLETE				4
 #define DEF_ITEMLOG_NEWGENDROP			5
 #define DEF_ITEMLOG_DUPITEMID			6
-#define DEF_ITEMLOG_BUY					7        // 12-22 성후니추가 
+#define DEF_ITEMLOG_BUY					7        // 12-22 added
 #define DEF_ITEMLOG_SELL				8     
 #define DEF_ITEMLOG_RETRIEVE			9
 #define DEF_ITEMLOG_DEPOSIT				10
@@ -120,7 +120,7 @@
 #define DEF_ITEMLOG_SKILLLEARN			16
 #define DEF_ITEMLOG_REPAIR				17
 #define DEF_ITEMLOG_JOINGUILD           18
-#define DEF_ITEMLOG_BANGUILD            19	// 한국에 빠진 로그
+#define DEF_ITEMLOG_BANGUILD            19	// Log missing in Korea
 #define DEF_ITEMLOG_RESERVEFIGZONE      20	//  "
 #define DEF_ITEMLOG_APPLY               21	//  "
 #define DEF_ITEMLOG_SHUTUP              22	//  "
@@ -134,7 +134,7 @@
 #define DEF_ITEMLOG_UPGRADESUCCESS      30
 
 
-// v2.15 전면전 로그 관련 
+// v2.15 All-out war log
 #define DEF_CRUSADELOG_ENDCRUSADE       1
 #define DEF_CRUSADELOG_STARTCRUSADE     2
 #define DEF_CRUSADELOG_SELECTDUTY       3
@@ -151,13 +151,13 @@
 
 #define DEF_MAXDUPITEMID				100
 
-#define DEF_MAXGUILDS					1000 // 동시에 접속할 수 있는 길드수 
-#define DEF_MAXONESERVERUSERS			800	 // 한 서버에서 허용할 수 있는 최대 사용자수. 초과된 경우 부활존 혹은 블리딩 아일, 농경지로 보내진다.
+#define DEF_MAXGUILDS					1000 // Guilds that can be online at once
+#define DEF_MAXONESERVERUSERS			800	 // Max users allowed on one server. Extra users go to the resurrection zone, Bleeding Isle or farmland.
 
 #define DEF_MAXGATESERVERSTOCKMSGSIZE	30000
 
 
-#ifdef DEF_TAIWAN    // 대만의 경우 최대 7개만 지어진다.
+#ifdef DEF_TAIWAN    // Taiwan builds at most 7.
 #define DEF_MAXCONSTRUCTNUM				7
 #else
 #define DEF_MAXCONSTRUCTNUM				10
@@ -166,46 +166,46 @@
 #define DEF_MAXSCHEDULE					10
 
 
-//v1.4311-3  사투장의 최대 숫자
+//v1.4311-3  Max number of fight zones
 #define DEF_MAXFIGHTZONE 10 
 
 //============================
-// #define DEF_LEVELLIMIT		130				// 체험판 레벨 제한치!!!			
-#define DEF_LEVELLIMIT		20				// 체험판 레벨 제한치!!!	// adamas
+// #define DEF_LEVELLIMIT		130				// Trial level limit!!!
+#define DEF_LEVELLIMIT		20				// Trial level limit!!!	// adamas
 //============================
 
 //============================
-#define DEF_MINIMUMHITRATIO 15				// 최저 명중 확률  //v2.172 10->15% 상승 
+#define DEF_MINIMUMHITRATIO 15				// Minimum hit chance  //v2.172 raised 10->15%
 //============================		
 
 //============================
-#define DEF_MAXIMUMHITRATIO	99				// 최대 명중 확률
+#define DEF_MAXIMUMHITRATIO	99				// Maximum hit chance
 //============================
 
 //============================
 #if defined(DEF_TESTSERVER)
-	// #define DEF_PLAYERMAXLEVEL	130				// 최대 레벨: Npc.cfg 파일에 설정되어 있지 않을 경우 m_iPlayerMaxLevel에 입력된다.
-	#define DEF_PLAYERMAXLEVEL	180				// 최대 레벨: Npc.cfg 파일에 설정되어 있지 않을 경우 m_iPlayerMaxLevel에 입력된다.
+	// #define DEF_PLAYERMAXLEVEL	130				// Max level: used for m_iPlayerMaxLevel when not set in Npc.cfg.
+	#define DEF_PLAYERMAXLEVEL	180				// Max level: used for m_iPlayerMaxLevel when not set in Npc.cfg.
 #else
-	#define DEF_PLAYERMAXLEVEL	180				// 최대 레벨: Npc.cfg 파일에 설정되어 있지 않을 경우 m_iPlayerMaxLevel에 입력된다.
+	#define DEF_PLAYERMAXLEVEL	180				// Max level: used for m_iPlayerMaxLevel when not set in Npc.cfg.
 	// #define DEF_PLAYERMAXLEVEL	140
 #endif
 //============================
 
 //============================
-#define DEF_GMGMANACONSUMEUNIT	15			// Grand Magic Generator 마나 흡수 단위.
+#define DEF_GMGMANACONSUMEUNIT	15			// Grand Magic Generator mana absorption unit.
 //============================
 
-#define DEF_MAXCONSTRUCTIONPOINT 30000		// 최대 소환 포인트 
+#define DEF_MAXCONSTRUCTIONPOINT 30000		// Max summon points
 
 #define DEF_MAXWARCONTRIBUTION	 500000
 
 #define DEF_MAXPARTYMEMBERS		8
 #define DEF_MAXPARTYNUM			5000
 
-#define DEF_MAXGIZONPOINT		37			// adamas : 최고 지존 업그레이드
+#define DEF_MAXGIZONPOINT		37			// adamas : top supreme upgrade
 
-// v2.181 2002-10-24 서버 속도 향상을 위해 스트링 비교를 줄인다.
+// v2.181 2002-10-24 Fewer string compares for server speed.
 #define DEF_NETURAL             0
 #define DEF_ARESDEN             1
 #define DEF_ELVINE              2
@@ -214,24 +214,24 @@
 //v2.19 2002-11-19 
 #define DEF_PK					0
 #define DEF_NONPK				1
-#define DEF_NEVERNONPK			2  //v2.19 2002-11-19 초보 미들 랜드 절때 PK불가능
+#define DEF_NEVERNONPK			2  //v2.19 2002-11-19 Never PK in the beginner middleland
 
-// 2002-12-24 전면전시 소환할 수 있는 (건물 수를 제외한) NPC의 수를 제한한다.(대만 요청)
+// 2002-12-24 Limit the NPCs (excluding buildings) that can be summoned in all-out war. (Taiwan request)
 #ifdef DEF_TAIWAN
 	#define DEF_MAX_CRUSADESUMMONMOB	5
 #else
 	#define DEF_MAX_CRUSADESUMMONMOB	500
 #endif
 
-// v2.20 2002-12-31 민간인 모드 레벨 제한 과 이동지역 제한 추가 
+// v2.20 2002-12-31 Added civilian mode level and area limits
 #define DEF_LIMITHUNTERLEVEL 100
 
 class CGame  
 {
 public:
-	int  iSetSide(int iClientH); // 2002-11-15 Client의 side, onTown, onShop 정보를 설정
-	void RequestHuntmode(int iClientH); // 2002-11-14 사냥꾼 모드 추가
-	void SetNoHunterMode(int iClientH,BOOL bSendMSG = FALSE); 	// v2.20 2002-12-31 민간인 모드 레벨 제한 과 이동지역 제한 추가 
+	int  iSetSide(int iClientH); // 2002-11-15 Set the Client side, onTown and onShop info
+	void RequestHuntmode(int iClientH); // 2002-11-14 Added hunter mode
+	void SetNoHunterMode(int iClientH,BOOL bSendMSG = FALSE); 	// v2.20 2002-12-31 Added civilian mode level and area limits
 	BOOL _bCrusadeLog(int iAction,int iClientH,int iData, char * cName);
 	void SetForceRecallTime(int iClientH) ; // v2.17 2002-7-15 
 	BOOL bCheckClientMoveFrequency(int iClientH, DWORD dwClientTime); // v2.171
@@ -280,7 +280,7 @@ public:
 	void GSM_SetGuildTeleportLoc(int iGuildGUID, int dX, int dY, char * pMapName);
 	void SyncMiddlelandMapInfo();
 	void _GrandMagicLaunchMsgSend(int iType, char cAttackerSide);
-	// v2.15 건물의 HP를 보여주기 위해 수정함 
+	// v2.15 Changed to show building HP
 	void GrandMagicResultHandler(char * cMapName, int iCrashedStructureNum, int iStructureDamageAmount, int iCasualities, int iActiveStructure, int iSTCount,char * pData);
 	void CalcMeteorStrikeEffectHandler(int iMapIndex);
 	void DoMeteorStrikeDamageHandler(int iMapIndex);
@@ -293,7 +293,7 @@ public:
 	void RequestHelpHandler(int iClientH);
 	void RemoveCrusadeStructures();
 
-	// v2.20 2002-12-28 전면전 종료후 민간인 마을로 강콜
+	// v2.20 2002-12-28 After the all-out war, force-recall civilians to town
 	void RecallHunterPlayer();
 
 	void _SendMapStatus(int iClientH);
@@ -320,9 +320,9 @@ public:
 	BOOL _bNpcBehavior_Detector(int iNpcH);
 	BOOL _bNpcBehavior_ManaCollector(int iNpcH);
 	BOOL __bSetConstructionKit(int iMapIndex, int dX, int dY, int iType, int iTimeCost, int iClientH);
-	BOOL __bSetAgricultureItem(int iMapIndex, int dX, int dY, int iType, int iSsn,int iClientH);   //v2.19 2002-12-16 농사스킬
-	BOOL bCropsItemDrop(int iClientH, short iTargetH,BOOL bMobDropPos = FALSE);												//v2.19 2002-12-16 농사스킬
-	int bProbabilityTable(int x,int y,int iTable);												//v2.19 2002-12-16 농사 스킬 관련
+	BOOL __bSetAgricultureItem(int iMapIndex, int dX, int dY, int iType, int iSsn,int iClientH);   //v2.19 2002-12-16 Farming skill
+	BOOL bCropsItemDrop(int iClientH, short iTargetH,BOOL bMobDropPos = FALSE);												//v2.19 2002-12-16 Farming skill
+	int bProbabilityTable(int x,int y,int iTable);												//v2.19 2002-12-16 Farming skill
 	void AgingMapSectorInfo();
 	void UpdateMapSectorInfo();
 
@@ -338,7 +338,7 @@ public:
 	void _DeleteRandomOccupyFlag(int iMapIndex);
 	void RequestSellItemListHandler(int iClientH, char * pData);
 	void AdminOrder_EnableAdminCreateItem(int iClientH, char * pData, DWORD dwMsgSize);
-	// v2.18 2002-10-15 중요 GM 명령어에 패스워드 추가 
+	// v2.18 2002-10-15 Added a password to important GM commands
 	void AdminOrder_EnableAdminCommand(int iClientH, char * pData, DWORD dwMsgSize); 
 	void AdminOrder_CreateItem(int iClientH, char * pData, DWORD dwMsgSize);
 	void RequestRestartHandler(int iClientH);
@@ -360,15 +360,15 @@ public:
 	int  iGetPlayerABSStatus(int iWhatH, int iRecvH); // 2002-12-2
 	void AdminOrder_DisconnectAll(int iClientH, char * pData, DWORD dwMsgSize);
 	void CheckSpecialEvent(int iClientH);
-	void CheckSpecialEventThirdYear(int iClientH); // 2002-10-25 3주년 이벤트 
+	void CheckSpecialEventThirdYear(int iClientH); // 2002-10-25 3rd anniversary event
 	void AdminOrder_Summon(int iClientH, char * pData, DWORD dwMsgSize);
-	// v2.14 유저 소환 명령어 추가 
+	// v2.14 Added the user summon command
 	void AdminOrder_SummonPlayer(int iClientH, char * pData, DWORD dwMsgSize);
 	// v2.15 2002-5-21
 	BOOL _bDecodeWorldConfigFileContents(char * pData, DWORD dwMsgSize);
 	// v2.17 2002-8-7 // 2002-09-06 #1
 	BOOL _bDecodeNpcItemConfigFileContents(char * pData, DWORD dwMsgSize);
-	// 2002-12-8 World server 보안 설정을 위해 
+	// 2002-12-8 For World server security settings
 	BOOL _bDecodeWLServerConfigFileContents(char * pData, DWORD dwMsgSize);
 	
 
@@ -386,7 +386,7 @@ public:
 
 	BOOL _bItemLog(int iAction, int iGiveH, int iRecvH, class CItem * pItem, BOOL bForceItemLog = FALSE) ;
 	BOOL _bItemLog(int iAction, int iClientH, char * cName, class CItem * pItem);
-	// v2.14 성후니 로그 
+	// v2.14 Log
 	BOOL _bPKLog(int iAction, int iAttackerH, int iVictumH, char * cNPC) ;
 	BOOL _bCheckGoodItem( class CItem * pItem ); 
 
@@ -418,7 +418,7 @@ public:
 	void _BWM_Command_Shutup(char * pData);
 	void _BWM_Init(int iClientH, char * pData);
 
-	// v2.15 메니저 프로그램 2002-5-6
+	// v2.15 Manager program 2002-5-6
 	void _Manager_Init(int iClientH, char * pData);
 	void _Manager_Shutdown(int iClientH, char * pData);
 
@@ -475,9 +475,9 @@ public:
 	BOOL bDeleteFish(int iHandle, int iDelMode);
 	int  iCreateFish(char cMapIndex, short sX, short sY, short sDifficulty, class CItem * pItem, int iDifficulty, DWORD dwLastTime);
 	void UserCommand_DissmissGuild(int iClientH, char * pData, DWORD dwMsgSize);
-	// v1.4311-3 변경 함수 선언  Expire -> Ban 으로 
+	// v1.4311-3 Changed function declaration Expire -> Ban
 	void UserCommand_BanGuildsman(int iClientH, char * pData, DWORD dwMsgSize);
-	// v1.4311-3 추가 함수 선언 이벤트를 대비하여 운영자가 사투장을 예약해놓는다.
+	// v1.4311-3 Added declaration: a GM reserves a fight zone for events.
 	void AdminOrder_ReserveFightzone(int iClientH, char * pData, DWORD dwMsgSize);
 	void AdminOrder_CloseConn(int iClientH, char * pData, DWORD dwMsgSize);
 	void AdminOrder_CallGuard(int iClientH, char * pData, DWORD dwMsgSize);
@@ -557,7 +557,7 @@ public:
 	void RequestCivilRightHandler(int iClientH, char * pData);
 	BOOL bCheckLimitedUser(int iClientH);
 	void LevelUpSettingsHandler(int iClientH, char * pData, DWORD dwMsgSize);
-	// v1.4311-3 선언 함수  사투장 예약 함수 선언 FightzoneReserveHandler
+	// v1.4311-3 Declared the fight-zone reservation function FightzoneReserveHandler
 	void FightzoneReserveHandler(int iClientH, char * pData, DWORD dwMsgSize);
 	BOOL bCheckLevelUp(int iClientH);
 	int iGetLevelExp(int iLevel);
@@ -636,13 +636,13 @@ public:
 	
 	BOOL _bGetIsStringIsNumber(char * pStr);
 	BOOL _bInitItemAttr(class CItem * pItem, char * pItemName);
-	// v2.17 2002-7-31 아이템을 아이템 고유번호로 생성할 수 있게 한다.
+	// v2.17 2002-7-31 Allow creating items by their unique number.
 	BOOL _bInitItemAttr(class CItem * pItem, int iItemID);
 	BOOL bReadProgramConfigFile(char * cFn);
 	void GameProcess();
 	void InitPlayerData(int iClientH, char * pData, DWORD dwSize);
 	void ResponsePlayerDataHandler(char * pData, DWORD dwSize);
-	// v2.14 GM Log 를 윌드 서버로 보내기 위해 수정함 .
+	// v2.14 Changed to send the GM log to the world server.
 	BOOL bSendMsgToLS(DWORD dwMsg, int iClientH, BOOL bFlag = TRUE,char * pData = NULL );
 	void OnMainLogRead();
 	void OnMainLogSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
@@ -662,19 +662,19 @@ public:
 	BOOL bInit();
 	void OnClientSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
 	BOOL bAccept(class XSocket * pXSock);
-	// v1.4311-3 함수 선언 입장권 받는 함수 .. void GetFightzoneTicketHandler(int iClientH);
+	// v1.4311-3 Declared the ticket function .. void GetFightzoneTicketHandler(int iClientH);
 	void GetFightzoneTicketHandler(int iClientH);
-	// v1.4311-3 2 시간마다 사투장 예약을 초기화 시킨다.
+	// v1.4311-3 Reset fight-zone reservations every 2 hours.
 	void FightzoneReserveProcessor() ;
 
 	// 2002-10-23 Item Event
 	BOOL NpcDeadItemGeneratorWithItemEvent(int iNpcH, short sAttackerH, char cAttackerType);
-	// 2002-10-24 Item Event List에 있는 아이템 중에 Type이 0인 아이템은 일반 아이템 생성과정에서 제외 된다.
+	// 2002-10-24 Items in the Item Event List with Type 0 are excluded from normal item generation.
 	BOOL bCheckInItemEventList(int iItemID, int iNpcH);
 
-	// 2002-12-6  Teleport 기능 추가
+	// 2002-12-6  Added the Teleport feature
 	BOOL _bDecodeTeleportListConfigFileContents(char * pData, DWORD dwMsgSize);
-	// 2002-12-6  Teleport 기능 추가
+	// 2002-12-6  Added the Teleport feature
 	void RequestTeleportListHandler(int iClientH, char * pData, DWORD dwMsgSize);
 	void RequestChargedTeleportHandler(int iClientH, char *pData, DWORD dwMsgSize);
 
@@ -721,7 +721,7 @@ public:
 	class CQuest  * m_pQuestConfigList[DEF_MAXQUESTTYPE];
 	char            m_pMsgBuffer[DEF_MSGBUFFERSIZE+1];
 
-	// 2002-12-6  Teleport 기능 추가
+	// 2002-12-6  Added the Teleport feature
 	class CTeleport * m_pTeleportConfigList[DEF_MAXTELEPORTLIST];
 
 	HWND  m_hWnd;
@@ -734,7 +734,7 @@ public:
 
 	DWORD m_dwWhetherTime, m_dwGameTime1, m_dwGameTime2, m_dwGameTime3, m_dwGameTime4, m_dwGameTime5, m_dwGameTime6, m_dwFishTime;
 
-	BOOL  m_cDayOrNight;		// 1이면 주간, 2면 야간 
+	BOOL  m_cDayOrNight;		// 1 is day, 2 is night
  	int   m_iSkillSSNpoint[102];
 
 	class CMsg * m_pNoticeMsgList[DEF_MAXNOTIFYMSGS];
@@ -751,18 +751,18 @@ public:
 	char  m_cShutDownCode;
 	class CMineral * m_pMineral[DEF_MAXMINERALS];
 
-	int   m_iMiddlelandMapIndex;	// 전쟁터인 미들랜드 맵 인덱스: 이 값이 -1이면 미들랜드 맵이 없음을 의미 
-	int   m_iAresdenMapIndex;		// 아레스덴 맵 인덱스 
-	int	  m_iElvineMapIndex;		// 엘바인 맵 인덱스
+	int   m_iMiddlelandMapIndex;	// Map index of middleland, the battlefield: -1 means there is no middleland map
+	int   m_iAresdenMapIndex;		// Aresden map index
+	int	  m_iElvineMapIndex;		// Elvine map index
 	int   m_iAresdenOccupyTiles;
 	int   m_iElvineOccupyTiles;
 	int   m_iCurMsgs, m_iMaxMsgs;
 
-	// v1.4311-3 변수 선언  예약된 시간을 가지는 변수 DWORD m_dwCanFightzoneReserveTime 
+	// v1.4311-3 Declared the variable holding the reserved time DWORD m_dwCanFightzoneReserveTime
 	DWORD m_dwCanFightzoneReserveTime ;
-	// v1.4311-3 변수 선언 각 사투장의 예약 여부를 저장 int  m_iFightZoneReserve[DEF_MAXFIGHTZONE];
+	// v1.4311-3 Declared the per-fight-zone reservation state int  m_iFightZoneReserve[DEF_MAXFIGHTZONE];
 	int  m_iFightZoneReserve[DEF_MAXFIGHTZONE] ;
-	// v1.4311-3 변수 선언 사투장에 들어갔을때 운영자 명령어로 강콜 않되게 함.
+	// v1.4311-3 Declared: no forced recall by GM command inside a fight zone.
 	int  m_iFightzoneNoForceRecall  ;
 
 	struct {
@@ -779,8 +779,8 @@ public:
 	BOOL  m_bIsSubLogSockAvailable[DEF_MAXSUBLOGSOCK];
 	int	  m_iCurSubLogSockIndex;
 	int   m_iSubLogSockFailCount;
-	int   m_iSubLogSockActiveCount;	// v1.5 현재 연결 상태가 유지되고 있는 sub-log-socket 갯수
-	int   m_iAutoRebootingCount;	// v1.5 자동 재부팅 된 횟수 
+	int   m_iSubLogSockActiveCount;	// v1.5 Number of sub-log-sockets currently connected
+	int   m_iAutoRebootingCount;	// v1.5 Number of automatic reboots
 
 	class CBuildItem * m_pBuildItemList[DEF_MAXBUILDITEMS];
 	class CItem * m_pDupItemIDList[DEF_MAXDUPITEMID];
@@ -791,14 +791,14 @@ public:
 	DWORD  m_dwMapSectorInfoTime;
 	int    m_iMapSectorInfoUpdateCount;
 
-	// Crusade 처리용
-	int	   m_iCrusadeCount;			// 0이면 전면전 대기상태. 1이면 카운트 다운 시작. 
-	BOOL   m_bIsCrusadeMode;		// 크루세이드 모드
+	// For Crusade handling
+	int	   m_iCrusadeCount;			// 0 is all-out war standby. 1 starts the countdown.
+	BOOL   m_bIsCrusadeMode;		// Crusade mode
 
 	struct {
-		char cMapName[11];			// 설치되는 맵 위치
-		char cType;					// 건축물 종류. 사실 NPC 종류임.
-		int  dX, dY;				// 설치되는 맵상의 위치
+		char cMapName[11];			// Map where it is placed
+		char cType;					// Building type. Actually the NPC type.
+		int  dX, dY;				// Position on the map where it is placed
 
 	} m_stCrusadeStructures[DEF_MAXCRUSADESTRUCTURES];
 
@@ -819,22 +819,22 @@ public:
 		int iCasualties;
 	} m_stMeteorStrikeResult;
 
-	// 미들랜드의 정보를 저장하는 구조체. 미들랜드를 운용하지 않는 서버에서는 이 정보를 받아 갱신한다.
+	// Structure holding middleland info. Servers that do not run middleland receive and update it.
 	struct {
-		char cType;			// 이게 NULL이면 정의되지 않은것을 의미.
-		char cSide;			// 사이드
-		short sX, sY;		// 설치된 위치 
+		char cType;			// NULL means not defined.
+		char cSide;			// Side
+		short sX, sY;		// Placed position
 	} m_stMiddleCrusadeStructureInfo[DEF_MAXCRUSADESTRUCTURES];
 	int m_iTotalMiddleCrusadeStructures;
  
-	// 이 변수 안에는 현재 접속한 클라이언트의 인덱스가 공백없이 저장되어 있다. 0이 나오면 리스트의 끝이라는 의미
+	// Holds the indexes of connected clients without gaps. A 0 marks the end of the list
 	int m_iClientShortCut[DEF_MAXCLIENTS+1];
 
 	int m_iNpcConstructionPoint[DEF_MAXNPCTYPES];
 	DWORD m_dwCrusadeGUID;
 	int   m_iCrusadeWinnerSide;   
 	int	  m_iWinnerSide;		//v2.19 2002-11-15 
-	int	  m_iNonAttackArea;		//v2.19 2002-11-19 초보 미들 절대 공격 불가능 하기위해 추가.
+	int	  m_iNonAttackArea;		//v2.19 2002-11-19 Added so the beginner middleland can never be attacked.
 
 	int   m_iPlayerMaxLevel;
 	// v2.15 2002-5-21
@@ -861,7 +861,7 @@ public:
 	class CItem * m_pGold;
 
 	// 2002-09-09 #1
-	// NPCITEM List보다 ITEM List가 먼저 도착 했는지 검사하는 변수
+	// Variable that checks the ITEM List arrived before the NPCITEM List
 	bool	m_bReceivedItemList;
 
 private:

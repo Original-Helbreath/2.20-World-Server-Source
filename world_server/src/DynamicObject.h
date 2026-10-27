@@ -28,8 +28,8 @@ public:
 	DWORD m_dwRegisterTime;
 	DWORD m_dwLastTime;
 
-	int   m_iCount;			// 특수 오브젝트의 경우 사용하는 카운터 변수 
-	int   m_iV1;			// 추가 정보를 넣을때 사용한다.
+	int   m_iCount;			// Counter variable used by special objects
+	int   m_iV1;			// Used to store extra information.
 };
 
 #endif // !defined(AFX_DYNAMICOBJECT_H__D8E4A581_0C95_11D3_8F1D_00001C7030A6__INCLUDED_)

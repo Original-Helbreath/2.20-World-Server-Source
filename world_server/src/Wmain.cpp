@@ -37,7 +37,7 @@ char            G_cTxt[512];
 char			G_cData50000[50000];
 MMRESULT        G_mmTimer = NULL;
 
-// v2.14 로그 부하 감소용 버퍼및 카운터 그리고 시간 플래그 
+// v2.14 Buffer, counter and time flag to reduce log load
 char			G_cLogBuffer[30000] ;
 short			G_sLogCounter ;
 DWORD			G_dwLogTime ; 
@@ -178,7 +178,7 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
  char cTitle[100];
  HANDLE hFile;
  SYSTEMTIME SysTime;
-	// 서버 부팅시간 기록 
+	// Record the server boot time
 	
 	//hFile = hFile = CreateFile("HGserver.exe", GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
 	//if (hFile == INVALID_HANDLE_VALUE) return FALSE;
@@ -250,14 +250,14 @@ void Initialize()
 		return;
 	}
 
-	// 게임 진행용 타이머 
+	// Game timer
 	G_mmTimer = _StartTimer(300);
 
 	G_pListenSock = new class XSocket(G_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
 	G_pListenSock->bListen(G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort, WM_USER_ACCEPT);
 
 	pLogFile = NULL;
-	//  v2.14 성후니 변경 대만 로그 부하 줄이기 위해 
+	//  v2.14 Changed to reduce the Taiwan log load
 	G_sLogCounter = 0 ;
 	ZeroMemory(G_cLogBuffer, sizeof(G_cLogBuffer));
 }
@@ -315,7 +315,7 @@ void OnPaint()
 	
 	SetBkMode(hdc,TRANSPARENT);
 
-	// 이벤트 리스트를 출력한다.
+	// Print the event list.
 	for (i = 0; i < 20; i++) {
 		cMsg = (char *)(G_cMsgList + i*120);
 		TextOut(hdc, 5, 5 + 350 - i*16, cMsg, strlen(cMsg));
@@ -340,7 +340,7 @@ void OnAccept()
 }
 
 
-void CALLBACK _TimerFunc(UINT wID, UINT wUser, DWORD dwUSer, DWORD dw1, DWORD dw2)
+void CALLBACK _TimerFunc(UINT wID, UINT wUser, DWORD_PTR dwUSer, DWORD_PTR dw1, DWORD_PTR dw2)
 {
 	PostMessage(G_hWnd, WM_USER_TIMERSIGNAL, wID, NULL);
 }
@@ -417,7 +417,7 @@ void PutAdminLogFileList(char * cStr)
 
 void PutItemLogFileList(char * cStr, BOOL bIsSave)
 {
- // v2.14 성후니 변경 대만 로그 부하를 줄이기 위해 
+ // v2.14 Changed to reduce the Taiwan log load
  char cTempBuffer[512];
  SYSTEMTIME SysTime;
  DWORD dwTime;
@@ -437,8 +437,8 @@ void PutItemLogFileList(char * cStr, BOOL bIsSave)
 
 	strcat(G_cLogBuffer, cTempBuffer) ;
 
-	// 로그 버퍼에 100개의 로그가 쌓여 있던지 
-	// 혹은 로그를 쓴지 10초가 지난경우 그리고 마지막 셧다운시는 무조건 저장한다.
+	// Save when 100 logs are in the buffer,
+	// or 10 seconds after the last write, and always at shutdown.
 	if ( G_sLogCounter >= 100 || (dwTime - G_dwLogTime  >  10*1000)  || bIsSave == TRUE) {
 		ZeroMemory(cTempBuffer, sizeof(cTempBuffer)) ;
 		_mkdir("LogData");

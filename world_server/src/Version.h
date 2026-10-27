@@ -22,7 +22,7 @@
 	#define DEF_BUILDDATE			429		// 310
 
 
-#else	// 다른 국가들
+#else	// Other countries
 
 	#define DEF_LOWERVERSION 		"19"
 	#define DEF_BUILDDATE			213

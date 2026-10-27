@@ -32,11 +32,11 @@
 #define DEF_MAGICTYPE_DAMAGE_LINEAR			19
 #define DEF_MAGICTYPE_POLYMORPH				20
 #define DEF_MAGICTYPE_DAMAGE_AREA_NOSPOT		21
-#define DEF_MAGICTYPE_TREMOR					22 // 땅의 속성의 진동 
-#define DEF_MAGICTYPE_ICE						23 // 얼리는것 
+#define DEF_MAGICTYPE_TREMOR					22 // Earth attribute tremor
+#define DEF_MAGICTYPE_ICE						23 // Freezing
 #define DEF_MAGICTYPE_DAMAGE_SPOT_SPDOWN		24
 #define DEF_MAGICTYPE_DAMAGE_AREA_NOSPOT_SPDOWN	25
-// v2.16 2002-5-23 고광현
+// v2.16 2002-5-23
 #define DEF_MAGICTYPE_DAMAGE_AREA_ARMOR_BREAK	26
 #define DEF_MAGICTYPE_ICE_LINEAR				27
 
@@ -57,8 +57,8 @@ public:
 	short m_sIntLimit;
 	int   m_iGoldCost;
 	
-	char  m_cCategory; // 마법 종류: 일반 마법 0, 공격마법 1, 방어 마법 2 
-	int   m_iAttribute; // 마법 속성:  땅 1 하늘 2 불 3 물 4  
+	char  m_cCategory; // Magic type: normal 0, attack 1, defence 2
+	int   m_iAttribute; // Magic attribute:  earth 1 air 2 fire 3 water 4
 };
 
 #endif // !defined(AFX_MAGIC_H__CD611900_EF3A_11D2_9B6C_00001C7030A6__INCLUDED_)

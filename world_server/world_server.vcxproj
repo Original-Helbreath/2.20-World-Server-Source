@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- WORLD-001: the 2.20 game server (HGserver.dsp) built with VS 2026. Defines and libraries follow HGserver.dsp. -->
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<VCProjectVersion>18.0</VCProjectVersion>
+		<ProjectGuid>{3D7B2C41-9E5A-4F18-B6C2-7A0E1D4F9B23}</ProjectGuid>
+		<RootNamespace>world_server</RootNamespace>
+		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v145</PlatformToolset>
+		<!-- VC6 default: no _UNICODE; the legacy code calls the ANSI Win32 API through the generic names. -->
+		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+		<UseDebugLibraries>false</UseDebugLibraries>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<PropertyGroup>
+		<OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+		<TargetName>world_server</TargetName>
+	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<!-- Legacy code: /W3 as in HGserver.dsp, warnings visible but not errors (WORLD-001 scope). -->
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<SDLCheck>false</SDLCheck>
+			<!-- /permissive: VC6 code (string literals into char*, for-scope) needs the non-conforming mode. -->
+			<ConformanceMode>false</ConformanceMode>
+			<LanguageStandard>stdcpp20</LanguageStandard>
+			<!-- Source is UTF-8; all Korean comments and literals were translated to English in WORLD-001, so the source is ASCII and the default execution charset is used. -->
+			<AdditionalOptions>/source-charset:utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+			<!-- winsock2.h first, so windows.h never pulls the old winsock.h (the VC6 SDK tolerated both). -->
+			<!-- Side effect: winsock2.h sets FD_SETSIZE first, so XSocket.h's FD_SETSIZE 2000 has no effect (C4005); harmless, the code never calls select(). -->
+			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<AdditionalDependencies>winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+		<ClCompile>
+			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+		</ClCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+		<ClCompile>
+			<Optimization>MaxSpeed</Optimization>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+		</ClCompile>
+		<Link>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClCompile Include="src\Wmain.cpp" />
+		<ClCompile Include="src\Game.cpp" />
+		<ClCompile Include="src\Client.cpp" />
+		<ClCompile Include="src\Teleport.cpp" />
+		<ClCompile Include="src\BuildItem.cpp" />
+		<ClCompile Include="src\DelayEvent.cpp" />
+		<ClCompile Include="src\DynamicObject.cpp" />
+		<ClCompile Include="src\Fish.cpp" />
+		<ClCompile Include="src\GuildsMan.cpp" />
+		<ClCompile Include="src\Item.cpp" />
+		<ClCompile Include="src\Magic.cpp" />
+		<ClCompile Include="src\Map.cpp" />
+		<ClCompile Include="src\Mineral.cpp" />
+		<ClCompile Include="src\Misc.cpp" />
+		<ClCompile Include="src\Msg.cpp" />
+		<ClCompile Include="src\Npc.cpp" />
+		<ClCompile Include="src\OccupyFlag.cpp" />
+		<ClCompile Include="src\Potion.cpp" />
+		<ClCompile Include="src\Quest.cpp" />
+		<ClCompile Include="src\Skill.cpp" />
+		<ClCompile Include="src\StrategicPoint.cpp" />
+		<ClCompile Include="src\TeleportLoc.cpp" />
+		<ClCompile Include="src\Tile.cpp" />
+		<ClCompile Include="src\StrTok.cpp" />
+		<ClCompile Include="src\XSocket.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="src\ActionID.h" />
+		<ClInclude Include="src\BuildItem.h" />
+		<ClInclude Include="src\Client.h" />
+		<ClInclude Include="src\DelayEvent.h" />
+		<ClInclude Include="src\DynamicObject.h" />
+		<ClInclude Include="src\DynamicObjectID.h" />
+		<ClInclude Include="src\english.h" />
+		<ClInclude Include="src\englishitem.h" />
+		<ClInclude Include="src\Fish.h" />
+		<ClInclude Include="src\Game.h" />
+		<ClInclude Include="src\GlobalDef.h" />
+		<ClInclude Include="src\GuildsMan.h" />
+		<ClInclude Include="src\Item.h" />
+		<ClInclude Include="src\koreaitem.h" />
+		<ClInclude Include="src\Magic.h" />
+		<ClInclude Include="src\Map.h" />
+		<ClInclude Include="src\MessageIndex.h" />
+		<ClInclude Include="src\Mineral.h" />
+		<ClInclude Include="src\Misc.h" />
+		<ClInclude Include="src\Msg.h" />
+		<ClInclude Include="src\NetMessages.h" />
+		<ClInclude Include="src\Npc.h" />
+		<ClInclude Include="src\OccupyFlag.h" />
+		<ClInclude Include="src\Player.h" />
+		<ClInclude Include="src\Potion.h" />
+		<ClInclude Include="src\Quest.h" />
+		<ClInclude Include="src\Skill.h" />
+		<ClInclude Include="src\SkillNum.h" />
+		<ClInclude Include="src\StrategicPoint.h" />
+		<ClInclude Include="src\StrTok.h" />
+		<ClInclude Include="src\Teleport.h" />
+		<ClInclude Include="src\TeleportLoc.h" />
+		<ClInclude Include="src\Tile.h" />
+		<ClInclude Include="src\UserMessages.h" />
+		<ClInclude Include="src\Version.h" />
+		<ClInclude Include="src\WINMAIN.H" />
+		<ClInclude Include="src\XSocket.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- Imported but not part of HGserver.dsp's build. -->
+		<None Include="src\CrusadeCore.cpp" />
+		<None Include="src\CrusadeCore.h" />
+		<None Include="src\rusadeCore.cpp" />
+		<None Include="src\rusadeCore.h" />
+		<None Include="src\Structure.cpp" />
+		<None Include="src\Structure.h" />
+		<None Include="src\HGserver.dsp" />
+		<None Include="src\HGserver.dsw" />
+		<None Include="src\test.bat" />
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

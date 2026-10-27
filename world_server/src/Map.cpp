@@ -83,7 +83,7 @@ CMap::CMap(class CGame * pGame)
 	//m_sInitialPointY = 0;
 
 	m_bIsFixedDayMode = FALSE;
-	m_bIsFixedSnowMode = FALSE ; // v2.20 2002-12-20 크리스마스와 iceboud맵에서는 항상 눈이 내린다.
+	m_bIsFixedSnowMode = FALSE ; // v2.20 2002-12-20 It always snows at Christmas and on the icebound map.
 
 	m_iTotalFishPoint = 0;
 	m_iMaxFish = 0;
@@ -155,7 +155,7 @@ CMap::CMap(class CGame * pGame)
 
 	m_bIsEnergySphereAutoCreation = FALSE;
 
-	// 2002-7-5 맵에서 몹이벤트 시간및 양을 조절 가능하게 디폴트 15
+	// 2002-7-5 Default 15, so the map can set mob event time and amount
 	sMobEventAmount = 15 ;   
 }
 
@@ -288,7 +288,7 @@ void CMap::ClearOwner(int iDebugCode, short sOwnerH, char cOwnerType, short sX, 
 
 	pTile = (class CTile *)(m_pTile + sX + sY*m_sSizeY);
 
-	// 현 위치에 핸들이 일치하면 모두 클리어한다. 
+	// Clear everything if the handle at this position matches.
 	if ((pTile->m_sOwner == sOwnerH) && (pTile->m_cOwnerClass == cOwnerType)) {
 		pTile->m_sOwner      = NULL;
 		pTile->m_cOwnerClass = NULL;
@@ -321,7 +321,7 @@ BOOL CMap::bSetItem(short sX, short sY, class CItem * pItem)
 
 	pTile = (class CTile *)(m_pTile + sX + sY*m_sSizeY);
 
-	// v1.4 마지막 타일에 아이템이 있다면 삭제시키고 이동한다. 
+	// v1.4 If an item is on the last tile, delete it and move.
 	if (pTile->m_pItem[DEF_TILE_PER_ITEMS-1] != NULL) 
 		delete pTile->m_pItem[DEF_TILE_PER_ITEMS-1];
 	else pTile->m_cTotalItem++;
@@ -392,7 +392,7 @@ BOOL CMap::bIsValidLoc(short sX, short sY)
 BOOL CMap::bInit(char * pName)
 {
  int i;
-	// 맵파일을 로드한다.
+	// Load the map file.
 	ZeroMemory(m_cName, sizeof(m_cName));
 	strcpy(m_cName, pName);
 
@@ -431,9 +431,9 @@ BOOL CMap::_bDecodeMapDataFileContents()
 	ZeroMemory(cHeader, sizeof(cHeader));
 	ReadFile(hFile, (char *)cHeader, 256, &nRead, NULL);
 
-	// 헤더정보를 분석한다.
+	// Parse the header.
 
-	// 먼저 널문자를 없앤다.
+	// First remove the null characters.
 	for (i = 0; i < 256; i++) 
 		if (cHeader[i] == NULL) cHeader[i] = ' ';
 
@@ -470,36 +470,36 @@ BOOL CMap::_bDecodeMapDataFileContents()
 		token = pStrTok->pGet();
 	}
 
-	// 크기에 맞게 타일을 생성한다.
+	// Create tiles to fit the size.
 	m_pTile = (class CTile *)new class CTile[m_sSizeX * m_sSizeY];
 
-	// 타일의 정보를 읽어들인다.
+	// Read the tile info.
 	for (iy = 0; iy < m_sSizeY; iy++)
 	for (ix = 0; ix < m_sSizeX; ix++) {
 		ReadFile(hFile, (char *)cTemp, m_sTileDataSize, &nRead, NULL);	
 		pTile = (class CTile *)(m_pTile + ix + iy*m_sSizeY);
 		if ((cTemp[8] & 0x80) != 0) {
-			// 갈수없는 속성이 세트되어 있다.
+			// The blocked attribute is set.
 			 pTile->m_bIsMoveAllowed = FALSE;
 		}
 		else pTile->m_bIsMoveAllowed = TRUE;
 
 		if ((cTemp[8] & 0x40) != 0) {
-			// 텔레포트 속성이 세트되어 있다.
+			// The teleport attribute is set.
 			 pTile->m_bIsTeleport = TRUE;
 		}
 		else pTile->m_bIsTeleport = FALSE;
 		
-		//v2.19 2002-12-16 농사 스킬 관련 :: 농작물을 심을수 있는 곳이다.
+		//v2.19 2002-12-16 Farming skill :: crops can be planted here.
 		if ((cTemp[8] & 0x20) != 0) {
-			// 농사를 지을수 있는 속성이 세트되어 있다.
+			// The farmable attribute is set.
 			pTile->m_bIsFarmingAllowed = TRUE;
 		}
 		else pTile->m_bIsFarmingAllowed = FALSE;
 
 		sp = (short *)&cTemp[0];
 		if (*sp == 19) {
-			// 물 타일이다. 
+			// A water tile.
 			 pTile->m_bIsWater = TRUE;
 		}
 		else pTile->m_bIsWater = FALSE;
@@ -518,7 +518,7 @@ BOOL CMap::bSearchTeleportDest(int sX, int sY, char * pMapName, int * pDx, int *
 
 	for (i = 0; i < DEF_MAXTELEPORTLOC; i++)
 	if ((m_pTeleportLoc[i] != NULL) && (m_pTeleportLoc[i]->m_sSrcX == sX) && (m_pTeleportLoc[i]->m_sSrcY == sY)) {
-		// 같은 좌표를 갖는 텔레포트 위치를 찾았다. 	
+		// Found the teleport location with the same coordinates.
 		memcpy(pMapName, m_pTeleportLoc[i]->m_cDestMapName, 10);
 		*pDx  = m_pTeleportLoc[i]->m_sDestX;
 		*pDy  = m_pTeleportLoc[i]->m_sDestY;
@@ -592,7 +592,7 @@ BOOL CMap::bGetIsWater(short dX, short dY)
 }
 
 
-//v2.19 2002-12-16 농사 스킬 관련
+//v2.19 2002-12-16 Farming skill
 BOOL CMap::bGetIsFarm(short dX, short dY)
 {
  class CTile * pTile;	
@@ -611,10 +611,10 @@ int CMap::iAnalyze(char cType, int * pX, int * pY, int * pV1, int * pV2, int * p
 {
 
  
-	// 현재 맵의 상황을 분석하여 쿼리에 맞는 위치를 반환한다. 
+	// Analyse the current map and return a position matching the query.
 	switch (cType) {
 	case 1:
-		// 현재 교전이 벌어지고 있는 곳의 위치를 찾는다. 
+		// Find where fighting is happening now.
 
 		break;
 
@@ -642,7 +642,7 @@ int CMap::iRegisterOccupyFlag(int dX, int dY, int iSide, int iEKNum, int iDOI)
 	
 	for (i = 1; i < DEF_MAXOCCUPYFLAG; i++) 
 	if (m_pOccupyFlag[i] == NULL) {
-		// 값을 할당하고 반환.
+		// Assign the value and return.
 		m_pOccupyFlag[i] = new class COccupyFlag(dX, dY, iSide, iEKNum, iDOI);
 		if (m_pOccupyFlag == NULL) return -1;
 		else return i;
@@ -688,19 +688,19 @@ void CMap::_SetupNoAttackArea()
 
 	for (i = 0; i < DEF_MAXNMR; i++) {
 		if ((m_rcNoAttackRect[i].top > 0)) {
-			// No-Magic-Area가 정의되어 있다.
+			// A No-Magic-Area is defined.
 			for (ix = m_rcNoAttackRect[i].left; ix <= m_rcNoAttackRect[i].right; ix++)
 			for (iy = m_rcNoAttackRect[i].top; iy <= m_rcNoAttackRect[i].bottom; iy++) {
 				pTile = (class CTile *)(m_pTile + ix + iy*m_sSizeY);
-				pTile->m_iAttribute = pTile->m_iAttribute | 0x00000004;		// 3번째 비트를 세팅한다. 안전지대 
+				pTile->m_iAttribute = pTile->m_iAttribute | 0x00000004;		// Set the 3rd bit. Safe area
 			}
 		}
 		else if (m_rcNoAttackRect[i].top == -10) {
-			// 전 영역 공격 금지다.	
+			// No attacks anywhere.
 			for (ix = 0; ix < m_sSizeX; ix++)
 			for (iy = 0; iy < m_sSizeY; iy++) {
 				pTile = (class CTile *)(m_pTile + ix + iy*m_sSizeY);
-				pTile->m_iAttribute = pTile->m_iAttribute | 0x00000004;		// 3번째 비트를 세팅한다. 안전지대
+				pTile->m_iAttribute = pTile->m_iAttribute | 0x00000004;		// Set the 3rd bit. Safe area
 			}
 		}
 	}
@@ -769,7 +769,7 @@ RCSI_REARRANGE:;
 }
 
 
-//v2.19 2002-12-16 농사 스킬 관련
+//v2.19 2002-12-16 Farming skill
 BOOL CMap::bAddCropsTotalSum()
 {
 	if(m_iTotalAgriculture < DEF_MAXAGRICULTURE)
@@ -780,7 +780,7 @@ BOOL CMap::bAddCropsTotalSum()
 	return FALSE;
 }
 
-//v2.19 2002-12-16 농사 스킬 관련
+//v2.19 2002-12-16 Farming skill
 BOOL CMap::bRemoveCropsTotalSum()
 {
 	if(m_iTotalAgriculture < DEF_MAXAGRICULTURE)

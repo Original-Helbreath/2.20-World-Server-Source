@@ -46,8 +46,8 @@ CNpc::CNpc(char * pName5)
 
 	m_iV1 = 0;
 
-	m_iNpcCrops = 0; //v2.19 2002-12-16 농사 스킬 관련
-	m_iCropsSkillLV = 0;	//v2.19 2002-12-16 농사 스킬 관련
+	m_iNpcCrops = 0; //v2.19 2002-12-16 Farming skill
+	m_iCropsSkillLV = 0;	//v2.19 2002-12-16 Farming skill
 
 	// 2002-09-17 #1
 	m_iNpcitemMax = 0;

@@ -11,7 +11,7 @@ int  EventLoop();
 void OnPaint();
 void OnDestroy();
 void Initialize();
-void CALLBACK _TimerFunc(UINT wID, UINT wUser, DWORD dwUSer, DWORD dw1, DWORD dw2);
+void CALLBACK _TimerFunc(UINT wID, UINT wUser, DWORD_PTR dwUSer, DWORD_PTR dw1, DWORD_PTR dw2);
 MMRESULT _StartTimer(DWORD dwTime);
 void _StopTimer(MMRESULT timerid);
 
