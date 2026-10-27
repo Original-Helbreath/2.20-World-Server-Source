@@ -396,119 +396,63 @@ CGame::~CGame()
 
 }
 
-BOOL CGame::bAccept(class XSocket * pXSock)
+// WORLD-005: a player whose world_enter_request was accepted takes a client slot (was bAccept on the XSocket
+// listener). Returns the slot, or -1 when the World is not ready or is full; pSock is then not taken.
+int CGame::iAddEnteredClient(class world_client_socket * pSock)
 {
- register int i;
- class XSocket * pTmpSock;
- char  cTxt[120];
+ int i;
 
-	if ((m_bIsLoginLinkAvailable == FALSE) || 
-		(m_bIsItemAvailable == FALSE)     || (m_bIsNpcAvailable == FALSE)       || 
-		(m_bIsMagicAvailable == FALSE)    || (m_bIsSkillAvailable == FALSE)     || 
-		(m_bIsPortionAvailable == FALSE)  || (m_bOnExitProcess == TRUE)         || 
+	if ((m_bIsLoginLinkAvailable == FALSE) ||
+		(m_bIsItemAvailable == FALSE)     || (m_bIsNpcAvailable == FALSE)       ||
+		(m_bIsMagicAvailable == FALSE)    || (m_bIsSkillAvailable == FALSE)     ||
+		(m_bIsPortionAvailable == FALSE)  || (m_bOnExitProcess == TRUE)         ||
 		(m_bIsQuestAvailable == FALSE)    || (m_bIsBuildItemAvailable == FALSE) ||
 		(m_bIsGameStarted == FALSE)
 #ifdef DEF_DEFENCEHACKING
-		// 2002-12-8 For World server security settings
 		|| (m_bIsWLServerAvailable == FALSE)
-#endif 
-		) 
-		goto CLOSE_ANYWAY;
+#endif
+		)
+		return -1;
 
-	// Find an empty slot.
 	for (i = 1; i < DEF_MAXCLIENTS; i++)
 	if (m_pClientList[i] == NULL) {
-		
+
 		m_pClientList[i] = new class CClient(m_hWnd);
+		m_pClientList[i]->m_pXSock = pSock;
 		// Record in the client index list
 		bAddClientShortCut(i);
 		// Record the connect time - to remove clients that do not respond for a long time.
-		m_pClientList[i]->m_dwSPTime = m_pClientList[i]->m_dwMPTime = 
-			m_pClientList[i]->m_dwHPTime = m_pClientList[i]->m_dwAutoSaveTime = 
-				m_pClientList[i]->m_dwTime = m_pClientList[i]->m_dwHungerTime = m_pClientList[i]->m_dwExpStockTime = 
+		m_pClientList[i]->m_dwSPTime = m_pClientList[i]->m_dwMPTime =
+			m_pClientList[i]->m_dwHPTime = m_pClientList[i]->m_dwAutoSaveTime =
+				m_pClientList[i]->m_dwTime = m_pClientList[i]->m_dwHungerTime = m_pClientList[i]->m_dwExpStockTime =
 					m_pClientList[i]->m_dwRecentAttackTime = m_pClientList[i]->m_dwAutoExpTime = m_pClientList[i]->m_dwSpeedHackCheckTime = timeGetTime();
-		
-		pXSock->bAccept(m_pClientList[i]->m_pXSock, WM_ONCLIENTSOCKETEVENT + i); 
-	
-		// Get the client's connection address.
-		ZeroMemory(m_pClientList[i]->m_cIPaddress, sizeof(m_pClientList[i]->m_cIPaddress));
-		m_pClientList[i]->m_pXSock->iGetPeerAddress(m_pClientList[i]->m_cIPaddress);
 
-		// Mark the client as connected.
-		wsprintf(G_cTxt,"<%d> New client: %s", i, m_pClientList[i]->m_cIPaddress);
-		PutLogList(G_cTxt);
+		ZeroMemory(m_pClientList[i]->m_cIPaddress, sizeof(m_pClientList[i]->m_cIPaddress));
+		pSock->iGetPeerAddress(m_pClientList[i]->m_cIPaddress);
+
+		hb::log::info("<{}> new client from {}", i, m_pClientList[i]->m_cIPaddress);
 
 		m_iTotalClients++;
 
-		if (m_iTotalClients > m_iMaxClients) { 
-			// The maximum user count was updated.
+		if (m_iTotalClients > m_iMaxClients) {
 			m_iMaxClients = m_iTotalClients;
 			GetLocalTime(&m_MaxUserSysTime);
-			wsprintf(cTxt, "Maximum Players: %d", m_iMaxClients);
-			//PutLogFileList(cTxt);
+			hb::log::debug("player peak: {}", m_iMaxClients);
 		}
-
-		// Accepted, but game data cannot be sent yet. It can be after the data is initialised.
-		//Must check m_pClientList[iClientH]->m_bIsInitComplete.
-		return TRUE;
+		return i;
 	}
 
-CLOSE_ANYWAY:;
-
-	// No empty slot, so the connection cannot be taken. Close it right after Accept.
-	pTmpSock = new class XSocket(m_hWnd, DEF_SERVERSOCKETBLOCKLIMIT);
-	pXSock->bAccept(pTmpSock, NULL); 
-	delete pTmpSock;
-
-	return FALSE;
+	return -1;
 }
 
-
-void CGame::OnClientSocketEvent(UINT message, WPARAM wParam, LPARAM lParam)
+// WORLD-005: the player's connection closed (was the XSocket SOCKETCLOSED event). Runs from the host loop, never
+// from inside the network layer's own callbacks.
+void CGame::OnClientClosed(int iClientH)
 {
- UINT iTmp;
- register int iClientH, iRet;
- 
+	if ((iClientH <= 0) || (iClientH >= DEF_MAXCLIENTS) || (m_pClientList[iClientH] == NULL)) return;
 
-	iTmp = WM_ONCLIENTSOCKETEVENT;
-	iClientH = message - iTmp;
-	
-	if (m_pClientList[iClientH] == NULL) return;
-
-	iRet = m_pClientList[iClientH]->m_pXSock->iOnSocketEvent(wParam, lParam);
-
-	switch (iRet) {
-	case DEF_XSOCKEVENT_READCOMPLETE:
-		// A message was received.
-		OnClientRead(iClientH);
-		// Record the response time.
-		m_pClientList[iClientH]->m_dwTime = timeGetTime();
-		break;
-	
-	case DEF_XSOCKEVENT_BLOCK:
-		//PutLogList("Socket BLOCKED!");
-		break;
-	
-	case DEF_XSOCKEVENT_CONFIRMCODENOTMATCH:
-		wsprintf(G_cTxt,"<%d> Confirmcode notmatch!", iClientH);
-		PutLogList(G_cTxt);
-		DeleteClient(iClientH, FALSE, TRUE);
-		break;
-
-	case DEF_XSOCKEVENT_MSGSIZETOOLARGE:
-		// The message to receive is larger than the buffer.	Must close.
-	case DEF_XSOCKEVENT_SOCKETERROR:
-		// Socket error.
-	case DEF_XSOCKEVENT_SOCKETCLOSED:
-		// Socket closed.
-		wsprintf(G_cTxt,"<%d> Client connection Lost! (%s)", iClientH, m_pClientList[iClientH]->m_cCharName);
-		PutLogList(G_cTxt);
-		
-
-		// v1.43 If the client closed the socket because of a teleport, do not save data or count.
-		DeleteClient(iClientH, TRUE, TRUE);
-		break;
-	}													    
+	hb::log::info("<{}> connection lost ({})", iClientH, m_pClientList[iClientH]->m_cCharName);
+	DeleteClient(iClientH, TRUE, TRUE);
 }
 
 BOOL CGame::bInit()		   
@@ -853,19 +797,17 @@ BOOL CGame::bInit()
 	return TRUE;
 }
 
-void CGame::OnClientRead(int iClientH)
+// WORLD-005: one legacy game message from an entered player, the body of a world_game_message frame (no cipher).
+void CGame::OnClientMessage(int iClientH, char * pData, DWORD dwMsgSize)
 {
- char  * pData, cKey;
- DWORD  dwMsgSize;
-	
-	if (m_pClientList[iClientH] == NULL) return;
- 
-	pData = m_pClientList[iClientH]->m_pXSock->pGetRcvDataPointer(&dwMsgSize, &cKey); // v1.4
-	
-	if (bPutMsgQuene(DEF_MSGFROM_CLIENT, pData, dwMsgSize, iClientH, cKey) == FALSE) {
+	if ((iClientH <= 0) || (iClientH >= DEF_MAXCLIENTS) || (m_pClientList[iClientH] == NULL)) return;
+
+	if (bPutMsgQuene(DEF_MSGFROM_CLIENT, pData, dwMsgSize, iClientH, 0) == FALSE) {
 		// The message queue is broken. Fatal error.
 		PutLogList("@@@@@@ CRITICAL ERROR in MsgQuene!!! @@@@@@");
 	}
+	// Record the response time.
+	m_pClientList[iClientH]->m_dwTime = timeGetTime();
 }
 
 
@@ -2780,8 +2722,8 @@ void CGame::DeleteClient(int iClientH, BOOL bSave, BOOL bNotify, BOOL bCountLogo
 				SendMsgToGateServer(MSGID_PARTYOPERATION, iClientH, cData);
 			}
 
-			// v1.41 Send through every sub-log-socket that can still send.
-			if (bSendMsgToLS(MSGID_REQUEST_SAVEPLAYERDATALOGOUT, iClientH, bCountLogout) == FALSE) LocalSavePlayerData(iClientH);
+			// WORLD-005: save to players.db; the legacy text file is only the fallback when that fails.
+			if (world_save_player(iClientH) == FALSE) LocalSavePlayerData(iClientH);
 		}
 		else bSendMsgToLS(MSGID_REQUEST_NOSAVELOGOUT, iClientH, bCountLogout);
 	}
@@ -2861,6 +2803,10 @@ DC_LOOPBREAK1:;
 	// v2.15 The management program does not count as a player. 2002-5-6
 	if (m_pClientList[iClientH]->m_bIsManager != TRUE)
 		m_iTotalClients--;
+
+	// WORLD-005: the account leaves the World, saved or not (logout, kick, failed load).
+	if (m_pClientList[iClientH]->m_iAccountID != 0)
+		world_session_ended(m_pClientList[iClientH]->m_iAccountID, m_pClientList[iClientH]->m_cSessionEndReason);
 
 	// Delete the client object.
 	delete m_pClientList[iClientH];
@@ -3894,7 +3840,8 @@ void CGame::CheckClientResponseTime()
 				if ((m_pMapList[m_pClientList[i]->m_cMapIndex]->m_bIsFightZone == FALSE) &&
 					((dwTime - m_pClientList[i]->m_dwAutoSaveTime) > (DWORD)DEF_AUTOSAVETIME)) {
 										
-					bSendMsgToLS(MSGID_REQUEST_SAVEPLAYERDATA, i);
+					// WORLD-005: auto-save to players.db (was a save request to the log server).
+					if (world_save_player(i) == FALSE) LocalSavePlayerData(i);
 					m_pClientList[i]->m_dwAutoSaveTime = dwTime;
 				}
 				
@@ -4764,12 +4711,8 @@ void CGame::ResponsePlayerDataHandler(char * pData, DWORD dwSize)
 
 void CGame::InitPlayerData(int iClientH, char * pData, DWORD dwSize)
 {
- char  * cp, cName[11], cData[256], cTxt[256], cGuildStatus;
- DWORD * dwp;
- WORD  * wp;
- int     i, iRet;
+ char  * cp, cName[11], cGuildStatus;
  BOOL    bRet;
- char  cPrice = 0;
 
 
 	if (m_pClientList[iClientH] == NULL) return;
@@ -4804,9 +4747,23 @@ void CGame::InitPlayerData(int iClientH, char * pData, DWORD dwSize)
 		DeleteClient(iClientH, FALSE, TRUE); //!!!
 		return;
 	}
-	
+
 	// *******^^^^^^^^^^^^^^^^^^^^Stats loaded^^^^^^^^^^^^^^^^^^^^^********
 	//***************************************************************************
+	_FinishInitPlayer(iClientH, cGuildStatus);
+}
+
+// WORLD-005: everything InitPlayerData did after the character was decoded, shared with the players.db entry path
+// (world_bridge.cpp), which loads the character from a record instead of the log server's file.
+void CGame::_FinishInitPlayer(int iClientH, char cGuildStatus)
+{
+ char  * cp, cData[256], cTxt[256];
+ DWORD * dwp;
+ WORD  * wp;
+ int     i, iRet;
+ char  cPrice = 0;
+
+	if (m_pClientList[iClientH] == NULL) return;
 
 	// (!) Restore the stats.
 	___RestorePlayerCharacteristics(iClientH);
@@ -4897,8 +4854,8 @@ void CGame::InitPlayerData(int iClientH, char * pData, DWORD dwSize)
 	// The client data is initialised.
 	m_pClientList[iClientH]->m_bIsInitComplete = TRUE;
 
-	// Tell the log server that this account's player entered the game.
-	bSendMsgToLS(MSGID_ENTERGAMECONFIRM, iClientH);
+	// WORLD-005: tell the Login server this account's player is in the game (was ENTERGAMECONFIRM to the log server).
+	world_session_started(m_pClientList[iClientH]->m_iAccountID, m_pClientList[iClientH]->m_cCharName);
 
 	// v2.06 12-5 Ask the GateServer whether this player's party is valid.
 	if (m_pClientList[iClientH]->m_iPartyID != NULL) {
@@ -8645,6 +8602,25 @@ DPDC_STOP_DECODING:;
 		return FALSE;
 	}
 	
+	return _bFinishDecodedPlayer(iClientH, iNotUsedItemPrice);
+}
+
+#endif // FILE_MODE: _bFinishDecodedPlayer below builds in both modes; the players.db path (game_access.cpp) needs it
+
+// WORLD-005: the checks and derived values that end a character load, moved here unchanged from the FILE_MODE
+// decoder so the players.db entry path (world_bridge.cpp) runs exactly the same rules. iNotUsedItemPrice is the
+// price of items dropped during the load, paid back as reward gold. (The decoder's fight-zone notice was sent to a
+// stale loop index; it now goes to the player.)
+BOOL CGame::_bFinishDecodedPlayer(int iClientH, int iNotUsedItemPrice)
+{
+ BOOL   bRet;
+ SYSTEMTIME SysTime;
+ __int64 iDateSum1, iDateSum2;
+ short  sTmpType = 0, sTmpAppr1;
+
+	if (m_pClientList[iClientH] == NULL) return FALSE;
+	if ((m_pClientList[iClientH]->m_cMapIndex < 0) || (m_pMapList[m_pClientList[iClientH]->m_cMapIndex] == NULL)) return FALSE;
+
 	// Check the loaded player data for errors and decide the return value.
 	bRet = m_pMapList[m_pClientList[iClientH]->m_cMapIndex]->bIsValidLoc(m_pClientList[iClientH]->m_sX, m_pClientList[iClientH]->m_sY);
 	if (bRet == FALSE) {
@@ -8728,7 +8704,7 @@ DPDC_STOP_DECODING:;
 		iDateSum2 = (__int64)(SysTime.wMonth*10000 + SysTime.wDay*100 + SysTime.wHour);
 		if (iDateSum2 >= iDateSum1) {
 			// Reservation cancelled
-			SendNotifyMsg(NULL, i, DEF_NOTIFY_FIGHTZONERESERVE, -2, NULL, NULL, NULL);
+			SendNotifyMsg(NULL, iClientH, DEF_NOTIFY_FIGHTZONERESERVE, -2, NULL, NULL, NULL);
 			m_pClientList[iClientH]->m_iFightzoneNumber = 0; 
 			m_pClientList[iClientH]->m_iReserveTime = 0;
 			m_pClientList[iClientH]->m_iFightZoneTicketNumber = 0;
@@ -8822,6 +8798,8 @@ DPDC_STOP_DECODING:;
 
 	return TRUE;
 }
+
+#ifndef DEF_DBGAMESERVER // FILE_MODE again
 
 
 int CGame::_iComposePlayerDataFileContents(int iClientH, char * pData)

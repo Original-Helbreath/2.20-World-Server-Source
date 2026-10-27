@@ -30,6 +30,8 @@ int main()
 	{
 		tests::character_tests(t, folder);
 		tests::character_service_tests(t, folder);
+		tests::session_grant_tests(t);
+		tests::player_mapping_tests(t);
 	}
 	catch (const std::exception& failure)
 	{

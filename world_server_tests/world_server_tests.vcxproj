@@ -54,6 +54,8 @@
 		<Link>
 			<SubSystem>Console</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<!-- WORLD-005: the game's CClient (Client.cpp) uses timeGetTime. -->
+			<AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -83,6 +85,42 @@
 		<ClCompile Include="src\character_service_tests.cpp" />
 		<ClCompile Include="..\world_server\src\character_service.cpp" />
 		<ClCompile Include="..\shared\protocol\frame_codec.cpp" />
+		<ClCompile Include="src\session_grant_tests.cpp" />
+		<ClCompile Include="..\world_server\src\session_grants.cpp" />
+		<!-- WORLD-005: the CClient mapping and the game classes it needs build with the game's legacy settings
+		     (world_server.vcxproj): forced winsock2.h, legacy warning level, not conforming, NOMINMAX for Schemata. -->
+		<ClCompile Include="src\player_mapping_tests.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<ConformanceMode>false</ConformanceMode>
+			<SDLCheck>false</SDLCheck>
+			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+			<PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<ClCompile Include="..\world_server\src\player_mapping.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<ConformanceMode>false</ConformanceMode>
+			<SDLCheck>false</SDLCheck>
+			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+			<PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<ClCompile Include="..\world_server\src\Client.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<ConformanceMode>false</ConformanceMode>
+			<SDLCheck>false</SDLCheck>
+			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+			<PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<ClCompile Include="..\world_server\src\Item.cpp">
+			<WarningLevel>Level3</WarningLevel>
+			<TreatWarningAsError>false</TreatWarningAsError>
+			<ConformanceMode>false</ConformanceMode>
+			<SDLCheck>false</SDLCheck>
+			<ForcedIncludeFiles>winsock2.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+			<PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
 	</ItemGroup>
 	<ItemGroup>
 		<ClInclude Include="src\test_runner.h" />

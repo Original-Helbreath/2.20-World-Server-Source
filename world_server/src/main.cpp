@@ -17,12 +17,12 @@
 #include "character_host.h"
 #include "login_link.h"
 #include "platform_win32.h"
+#include "world_host.h"
 #include "world_config.h"
 
 char			G_cTxt[512];
 char			G_cData50000[50000];
 
-class XSocket * G_pListenSock = NULL;
 class CGame *   G_pGame       = NULL;
 
 BOOL			G_bIsThread = TRUE;
@@ -62,15 +62,10 @@ namespace
 			G_pGame->OnStartGameSignal();
 			return 0;
 
-		case WM_USER_ACCEPT:
-			G_pGame->bAccept(G_pListenSock);
-			return 0;
-
 		default:
-			if ((message >= WM_ONCLIENTSOCKETEVENT) && (message < WM_ONCLIENTSOCKETEVENT + DEF_MAXCLIENTS)) {
-				G_pGame->OnClientSocketEvent(message, first, second);
-				return 0;
-			}
+			// WORLD-005: game clients are on hb::net (client_gate.cpp); no socket events arrive as window messages.
+			(void)first;
+			(void)second;
 			break;
 		}
 
@@ -99,10 +94,21 @@ namespace
 
 		world::link_events events;
 		events.on_registered = [] {
-			if (G_pGame != NULL) G_pGame->m_bIsLoginLinkAvailable = TRUE;
+			if (G_pGame != NULL) {
+				G_pGame->m_bIsLoginLinkAvailable = TRUE;
+				// WORLD-005: DEF_DEFENCEHACKING (on for DEF_CHINESE) also waits for the old World Log server, which the
+				// Login link replaces; without this the game never starts and no player can enter.
+				G_pGame->m_bIsWLServerAvailable = TRUE;
+			}
+			world::host_announce_players();
 		};
+		events.on_session_grant = [](const world::session_grant_request & grant) { return world::host_session_grant(grant); };
+		events.on_kick = [](std::uint64_t account_id, std::uint8_t reason) { world::host_kick(account_id, reason); };
 		events.on_lost = [] {
-			if (G_pGame != NULL) G_pGame->m_bIsLoginLinkAvailable = FALSE;
+			if (G_pGame != NULL) {
+				G_pGame->m_bIsLoginLinkAvailable = FALSE;
+				G_pGame->m_bIsWLServerAvailable = FALSE;
+			}
 			hb::log::warning("refusing new players until the Login link is back");
 		};
 		events.on_refused = [](std::string_view) {
@@ -121,6 +127,7 @@ namespace
 		events.characters = characters;
 
 		G_pLoginLink = std::make_unique<world::login_link>(config, std::move(registration), std::move(events));
+		world::host_attach_link(G_pLoginLink.get());
 		G_pLoginLink->start();
 	}
 
@@ -158,16 +165,14 @@ namespace
 			return false;
 		}
 
-		G_pListenSock = new class XSocket(window, DEF_SERVERSOCKETBLOCKLIMIT);
-		if (G_pListenSock->bListen(G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort, WM_USER_ACCEPT) == FALSE) {
-			hb::log::error("cannot listen on {}:{}", G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort);
-			return false;
-		}
-		hb::log::info("listening on {}:{}", G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort);
-
 		// WORLD-006: players.db holds the characters the Login server lists, creates and deletes through this World.
 		hb::server::world::character_service * characters = hb::server::world::open_characters(config.players_database);
 		if (characters == nullptr) return false;
+
+		// WORLD-005: game clients enter with a Login ticket on the shared hb::net layer (was the XSocket listener).
+		if (!hb::server::world::host_start(G_pGame->m_cGameServerAddr, static_cast<std::uint16_t>(G_pGame->m_iGameServerPort),
+				DEF_MAXCLIENTS - 1, *hb::server::world::characters_store()))
+			return false;
 
 		start_login_link(config, characters);
 		return true;
@@ -183,6 +188,7 @@ namespace
 		auto next_tick = clock::now() + timer_interval;
 		while (!platform::stop_requested()) {
 			if (G_pLoginLink) G_pLoginLink->poll();
+			hb::server::world::host_poll();
 			auto now = clock::now();
 			if (now >= next_tick) {
 				if (G_bShutdown == FALSE) G_pGame->OnTimer(0);
@@ -204,17 +210,18 @@ namespace
 
 		G_bShutdown = TRUE;
 		hb::log::info("shutting down ({})", platform::stop_reason());
+		// WORLD-005: every player is saved and the Login server told, while the link is still up; then the port closes.
 		if (G_pGame != NULL && G_pGame->m_iTotalClients > 0)
-			hb::log::warning("{} player(s) still connected; their data is not saved", G_pGame->m_iTotalClients);
+			hb::log::info("saving {} player(s)", G_pGame->m_iTotalClients);
+		hb::server::world::host_stop();
 
 		if (G_pLoginLink) {
+			hb::server::world::host_attach_link(nullptr);
 			G_pLoginLink->stop();
 			G_pLoginLink.reset();
 		}
 		hb::server::world::close_characters();
 
-		if (G_pListenSock != NULL) delete G_pListenSock;
-		G_pListenSock = NULL;
 
 		if (G_pGame != NULL) {
 			G_pGame->Quit();

@@ -82,6 +82,8 @@ namespace hb::server::world
 		void on_character_list(hb::net::connection& from, const hb::net::frame& received);
 		void on_create_character(hb::net::connection& from, const hb::net::frame& received);
 		void on_delete_character(hb::net::connection& from, const hb::net::frame& received);
+		void on_session_grant(hb::net::connection& from, const hb::net::frame& received);
+		void on_kick_account(hb::net::connection& from, const hb::net::frame& received);
 		void on_close(hb::net::connection& from, close_reason reason, std::string_view detail);
 		void start_timers(hb::net::connection& from);
 		void stop_timers();
@@ -186,9 +188,10 @@ namespace hb::server::world
 			on_delete_character(from, received);
 			return;
 		case message_id::link_session_grant:
+			on_session_grant(from, received);
+			return;
 		case message_id::link_kick_account:
-			// Session requests are answered from WORLD-005 on.
-			hb::log::debug("login request 0x{:04x} not handled yet", id);
+			on_kick_account(from, received);
 			return;
 		default:
 			hb::log::warning("unexpected message 0x{:04x} from the Login server", id);
@@ -218,7 +221,12 @@ namespace hb::server::world
 			hb::log::error("character list for account {} does not fit the packet", request.account_id);
 			head.count = 0;
 			if (!hb::net::encode_character_list(head, std::span<const hb::net::character_summary>(), hb::net::connection_options{}.max_body_bytes, bytes))
+			{
+				// The Login server would wait for an answer that never comes; the link is reset instead.
+				hb::log::error("empty character list for account {} does not encode; resetting the Login link", request.account_id);
+				from.close(close_reason::protocol_error, "character_list_response encode");
 				return;
+			}
 		}
 		from.send_encoded(std::move(bytes));
 	}
@@ -249,6 +257,40 @@ namespace hb::server::world
 		response.request_id = request.request_id;
 		response.result = events.characters != nullptr ? events.characters->remove(request) : hb::net::login::character_result::world_unavailable;
 		(void)from.send(response);
+	}
+
+	void login_link::impl::on_session_grant(hb::net::connection& from, const hb::net::frame& received)
+	{
+		link::session_grant grant{};
+		if (!hb::net::decode(received, grant))
+		{
+			from.close(close_reason::protocol_error, "malformed session_grant");
+			return;
+		}
+		session_grant_request request;
+		request.account_id = grant.account_id;
+		request.character = std::string(grant.character.view());
+		request.ticket = grant.ticket;
+		request.expires_in_seconds = grant.expires_in_seconds;
+		link::session_grant_response response{};
+		response.request_id = grant.request_id;
+		response.result = events.on_session_grant ? static_cast<link::grant_result>(events.on_session_grant(request))
+												  : link::grant_result::shutting_down;
+		if (!link::is_known(response.result))
+			response.result = link::grant_result::shutting_down;
+		(void)from.send(response);
+	}
+
+	void login_link::impl::on_kick_account(hb::net::connection& from, const hb::net::frame& received)
+	{
+		link::kick_account kick{};
+		if (!hb::net::decode(received, kick))
+		{
+			from.close(close_reason::protocol_error, "malformed kick_account");
+			return;
+		}
+		if (events.on_kick)
+			events.on_kick(kick.account_id, static_cast<std::uint8_t>(kick.reason));
 	}
 
 	void login_link::impl::on_register_response(hb::net::connection& from, const hb::net::frame& received)
@@ -379,8 +421,22 @@ namespace hb::server::world
 		state.stopping = true;
 		if (!state.client)
 			return;
-		state.client->stop();
 		state.stop_timers();
+		// WORLD-005: the shutdown's session_ended frames are queued but not yet written. Close after sending, and poll
+		// (bounded) until they are out, before the client stops: its close drops whatever is still queued.
+		if (state.current)
+		{
+			state.current->close_after_send(close_reason::shutdown, "World stopping");
+			const auto flush_limit = std::chrono::steady_clock::now() + drain_limit;
+			while (state.current && std::chrono::steady_clock::now() < flush_limit)
+			{
+				state.context.restart();
+				state.context.poll();
+				if (state.current)
+					std::this_thread::sleep_for(5ms);
+			}
+		}
+		state.client->stop();
 		const auto limit = std::chrono::steady_clock::now() + drain_limit;
 		while ((state.current || state.client->current()) && std::chrono::steady_clock::now() < limit)
 		{
@@ -393,5 +449,35 @@ namespace hb::server::world
 	bool login_link::is_registered() const
 	{
 		return m_impl->registered;
+	}
+
+	void login_link::send_session_started(std::uint64_t account_id, std::string_view character)
+	{
+		if (!m_impl->current || !m_impl->registered)
+		{
+			hb::log::debug("session_started for account {} dropped: Login link down", account_id);
+			return;
+		}
+		link::session_started message{};
+		message.account_id = account_id;
+		if (!message.character.assign(character))
+		{
+			hb::log::error("character name {} does not fit session_started", character);
+			return;
+		}
+		(void)m_impl->current->send(message);
+	}
+
+	void login_link::send_session_ended(std::uint64_t account_id, std::uint8_t reason)
+	{
+		if (!m_impl->current || !m_impl->registered)
+		{
+			hb::log::debug("session_ended for account {} dropped: Login link down", account_id);
+			return;
+		}
+		link::session_ended message{};
+		message.account_id = account_id;
+		message.reason = static_cast<link::session_end_reason>(reason);
+		(void)m_impl->current->send(message);
 	}
 }

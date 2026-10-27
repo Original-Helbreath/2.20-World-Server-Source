@@ -143,6 +143,46 @@
 			<ForcedIncludeFiles></ForcedIncludeFiles>
 			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ClCompile>
+		<!-- WORLD-005: grants, the hb::net game-client port and the session host. New code: strict warnings. -->
+		<ClCompile Include="src\session_grants.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<ClCompile Include="src\client_gate.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<ClCompile Include="src\world_host.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+		<!-- WORLD-005: the CClient <-> players.db mapping and the game's side of the host. They include the game's headers,
+		     so they build with the legacy settings; NOMINMAX keeps windows.h's min/max macros out of Schemata's headers. -->
+		<ClCompile Include="src\player_mapping.cpp">
+			<PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<ClCompile Include="src\game_access.cpp">
+			<PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ClCompile>
+		<ClCompile Include="..\shared\net\server.cpp">
+			<WarningLevel>Level4</WarningLevel>
+			<TreatWarningAsError>true</TreatWarningAsError>
+			<ConformanceMode>true</ConformanceMode>
+			<ForcedIncludeFiles></ForcedIncludeFiles>
+			<PreprocessorDefinitions>ASIO_STANDALONE;ASIO_NO_DEPRECATED;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>$(SolutionDir)shared\protocol;$(SolutionDir)shared\net;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<ObjectFileName>$(IntDir)shared_net\</ObjectFileName>
+		</ClCompile>
 		<!-- shared/net and shared/protocol: the one network implementation of all three programs. The object folder keeps
 		     shared/net/client.cpp apart from the game's Client.cpp (file names compare case-insensitively). -->
 		<ClCompile Include="..\shared\net\connection.cpp">
@@ -260,6 +300,14 @@
 		<ClInclude Include="src\character_store.h" />
 		<ClInclude Include="src\character_service.h" />
 		<ClInclude Include="src\character_host.h" />
+		<ClInclude Include="src\session_grants.h" />
+		<ClInclude Include="src\pending_limits.h" />
+		<ClInclude Include="src\client_gate.h" />
+		<ClInclude Include="src\world_host.h" />
+		<ClInclude Include="src\world_bridge.h" />
+		<ClInclude Include="src\world_client_socket.h" />
+		<ClInclude Include="src\player_mapping.h" />
+		<ClInclude Include="src\game_access.h" />
 		<ClInclude Include="..\shared\net\asio_config.h" />
 		<ClInclude Include="..\shared\net\connection.h" />
 		<ClInclude Include="..\shared\net\client.h" />

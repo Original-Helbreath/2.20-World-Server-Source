@@ -35,6 +35,11 @@ namespace hb::server::world
 		return g_service.get();
 	}
 
+	character_store* characters_store()
+	{
+		return g_store.get();
+	}
+
 	void close_characters()
 	{
 		g_service.reset();

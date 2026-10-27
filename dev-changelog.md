@@ -1,15 +1,16 @@
-## Character list, create and delete
+## Enter the World with a Login ticket
 
 ### World Server
 
 **Added**
-- The World answers the Login server's character list, create and delete requests from players.db.
-- A new character gets the 2.20 starting defaults: the `default` map, level 1 and the starting kit (HP/MP/SP from the level-1 maximums and shirt colour 0 until the 2.20 values are recovered).
-- Characters are deleted only by their owner and only below level 50; at most 4 per account.
-- `world_server.json` gains `players_database`, the players.db path shared with the Login server.
+- Game clients enter the World with a Login ticket on the shared network layer, replacing the old XSocket listener; after the ticket, legacy game messages travel as SHARED-003 envelopes.
+- The World holds the Login server's session grants until they are used or expire, and refuses a bad, reused or expired ticket.
+- Characters load from and save to players.db with the old character-file load rules; players are saved on logout, auto-save and shutdown.
+- The Login server is told when each session starts and ends; the World acts on `kick_account`, and a re-entering account replaces its old session before the World-full check.
+- Connections that have not entered yet are capped at 32 in total and 2 per address; a game message too short for its id and type, or longer than the legacy buffer, closes the connection.
+- The `default` map, where new characters start, is loaded.
 
-**Changed**
-- `world_server.exe` links Schemata and uses the dynamic runtime (`/MD`), like the Login server.
-- `shared/` moves to SHARED-003 (game message envelope ids 0x0503 and 0x0504).
+**Fixed**
+- The game never started because it waited for the retired World Log server.
 
-Summary: World serves character select from players.db (2026-10-27)
+Summary: Players enter the World with a Login ticket, and their characters load from and save to players.db (2026-10-27)

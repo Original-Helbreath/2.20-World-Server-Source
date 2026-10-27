@@ -1,6 +1,6 @@
-## Character list, create and delete
+## Enter the World with a Login ticket
 
 **Added**
-- Characters are listed, created and deleted on the World server, and new characters start with the classic starting kit.
+- You enter the game world with the one-time ticket from the Login server, and your character is saved when you leave.
 
-Summary: Character select is served by the World (2026-10-27)
+Summary: Entering the game works through the new servers (2026-10-27)

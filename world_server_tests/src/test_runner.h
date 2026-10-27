@@ -44,4 +44,10 @@ namespace tests
 
 	// character_service_tests.cpp: list, create and delete answers, new-character defaults, summaries, envelope ids
 	void character_service_tests(runner& t, const std::filesystem::path& folder);
+
+	// session_grant_tests.cpp: ticket entry once, per character, before expiry (WORLD-005)
+	void session_grant_tests(runner& t);
+
+	// player_mapping_tests.cpp: players.db record -> CClient -> record round trip (WORLD-005)
+	void player_mapping_tests(runner& t);
 }

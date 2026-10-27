@@ -28,6 +28,7 @@
 #include "UserMessages.h"
 #include "NetMessages.h"
 #include "MessageIndex.h"
+#include "world_bridge.h"
 #include "Misc.h"
 #include "Msg.h"
 #include "Magic.h"
@@ -652,10 +653,13 @@ public:
 	int  iClientMotion_Move_Handler(int iClientH, short sX, short sY, char cDir, BOOL bIsRun);
 	void ClientMotionHandler(int iClientH, char * pData);
 	void DisplayInfo(HDC hdc);
-	void OnClientRead(int iClientH);
 	BOOL bInit();
-	void OnClientSocketEvent(UINT message, WPARAM wParam, LPARAM lParam);
-	BOOL bAccept(class XSocket * pXSock);
+	// WORLD-005: the hb::net entry path (world_bridge.cpp) replaces the XSocket listener and its socket events.
+	int  iAddEnteredClient(class world_client_socket * pSock);
+	void OnClientMessage(int iClientH, char * pData, DWORD dwMsgSize);
+	void OnClientClosed(int iClientH);
+	void _FinishInitPlayer(int iClientH, char cGuildStatus);
+	BOOL _bFinishDecodedPlayer(int iClientH, int iNotUsedItemPrice);
 	// v1.4311-3 Declared the ticket function .. void GetFightzoneTicketHandler(int iClientH);
 	void GetFightzoneTicketHandler(int iClientH);
 	// v1.4311-3 Reset fight-zone reservations every 2 hours.

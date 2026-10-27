@@ -12,9 +12,12 @@ CClient::CClient(HWND hWnd)
 {
  register int i;
 	
+	// WORLD-005: the connection is handed over by CGame::iAddEnteredClient.
+	(void)hWnd;
 	m_pXSock = NULL;
-	m_pXSock = new class XSocket(hWnd, DEF_CLIENTSOCKETBLOCKLIMIT);
-	m_pXSock->bInitBufferSize(DEF_MSGBUFFERSIZE);
+	m_iAccountID = 0;
+	m_iCharacterDBID = 0;
+	m_cSessionEndReason = 0;
 
 	ZeroMemory(m_cProfile, sizeof(m_cProfile));
 	strcpy(m_cProfile, "__________");

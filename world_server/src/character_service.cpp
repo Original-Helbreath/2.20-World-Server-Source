@@ -209,6 +209,10 @@ namespace hb::server::world
 		}
 		if (taken)
 			return character_result::name_taken;
+		// The slot count and the insert are two steps, not one transaction. That holds because every create runs on
+		// the World's one host thread (login_link is polled from the main loop) and only this World writes
+		// characters; a second writer would need both steps in one transaction. The unique name_key still
+		// refuses a duplicate name whatever happens.
 		std::vector<character> owned;
 		if (!m_store.list_for_account(static_cast<std::int64_t>(request.account_id), owned, error))
 		{

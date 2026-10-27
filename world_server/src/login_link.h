@@ -2,6 +2,7 @@
 
 #include "world_config.h"
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -38,6 +39,15 @@ namespace hb::server::world
 
 	class character_service;
 
+	// The two Login requests the session handling answers (link_messages.h); declared here so this header stays plain.
+	struct session_grant_request
+	{
+		std::uint64_t account_id = 0;
+		std::string character;
+		std::array<std::uint8_t, 32> ticket{};
+		std::uint16_t expires_in_seconds = 0;
+	};
+
 	struct link_events
 	{
 		std::function<void()> on_registered;                   // the Login accepted this World
@@ -45,6 +55,10 @@ namespace hb::server::world
 		std::function<void(std::string_view)> on_refused;      // refused for good (wrong key, unknown world); no retry
 		std::function<link_report()> report;                   // current status
 		character_service* characters = nullptr;               // answers list, create and delete (WORLD-006); null: refused
+		// WORLD-005: a session_grant; returns the hb::net::link::grant_result to answer with. Unset: shutting_down.
+		std::function<std::uint8_t(const session_grant_request&)> on_session_grant;
+		// WORLD-005: kick_account; reason is an hb::net::link::kick_reason value.
+		std::function<void(std::uint64_t account_id, std::uint8_t reason)> on_kick;
 	};
 
 	class login_link
@@ -66,6 +80,11 @@ namespace hb::server::world
 		void stop();
 
 		bool is_registered() const;
+
+		// WORLD-005: session_started / session_ended to the Login server; dropped (logged at debug) while unregistered.
+		// reason is an hb::net::link::session_end_reason value.
+		void send_session_started(std::uint64_t account_id, std::string_view character);
+		void send_session_ended(std::uint64_t account_id, std::uint8_t reason);
 
 	private:
 		struct impl;

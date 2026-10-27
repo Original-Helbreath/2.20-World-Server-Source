@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "XSocket.h"
+#include "world_client_socket.h"
 #include "Item.h"
 #include "GuildsMan.h"
 #include "Magic.h"
@@ -152,7 +153,13 @@ public:
 	//v1.4311-3 Added fight-zone number and fight-zone reservation time
 	int   m_iFightzoneNumber , m_iReserveTime, m_iFightZoneTicketNumber ; 
 
-	class XSocket * m_pXSock;
+	// WORLD-005: the hb::net connection (client_gate.cpp); owned and deleted by this client.
+	class world_client_socket * m_pXSock;
+
+	// WORLD-005: who this player is in players.db and to the Login server, and why the session ends.
+	__int64 m_iAccountID;          // 0 until the player entered with a ticket
+	__int64 m_iCharacterDBID;      // characters.id
+	char    m_cSessionEndReason;   // hb::net::link::session_end_reason; logout unless set before DeleteClient
 
 	int   m_iAdminUserLevel;     // Admin level. 0 is none. Higher numbers have more rights.
 	int   m_iRating;

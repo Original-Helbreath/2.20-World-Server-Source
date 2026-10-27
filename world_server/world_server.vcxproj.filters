@@ -48,6 +48,24 @@
 		<ClCompile Include="src\character_host.cpp">
 			<Filter>source</Filter>
 		</ClCompile>
+		<ClCompile Include="src\session_grants.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\client_gate.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\world_host.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\player_mapping.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="src\game_access.cpp">
+			<Filter>source</Filter>
+		</ClCompile>
+		<ClCompile Include="..\shared\net\server.cpp">
+			<Filter>shared</Filter>
+		</ClCompile>
 		<ClCompile Include="..\shared\net\connection.cpp">
 			<Filter>shared</Filter>
 		</ClCompile>

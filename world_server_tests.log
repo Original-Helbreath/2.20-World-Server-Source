@@ -1,0 +1,10 @@
+2026-10-27 09:27:19.833 [INFO] tests: schema updated: 9 statement(s) applied to test_data\character_tests\players.db
+2026-10-27 09:27:19.862 [INFO] tests: schema verified (test_data\character_tests\players.db)
+2026-10-27 09:27:19.884 [INFO] tests: schema updated: 9 statement(s) applied to test_data\character_service_tests\players.db
+2026-10-27 09:27:19.885 [INFO] tests: character Alpha created for account 11
+2026-10-27 09:27:19.886 [INFO] tests: character Beta created for account 11
+2026-10-27 09:27:19.887 [INFO] tests: character Gamma created for account 11
+2026-10-27 09:27:19.887 [INFO] tests: character Delta created for account 11
+2026-10-27 09:27:19.890 [INFO] tests: character Alpha deleted for account 11
+2026-10-27 09:27:19.892 [INFO] tests: character Epsilon created for account 11
+2026-10-27 09:27:19.893 [INFO] tests: 128 of 128 checks passed
