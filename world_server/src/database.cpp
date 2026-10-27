@@ -33,6 +33,10 @@ namespace hb::server::world
 				log::info("schema updated: {} statement(s) applied to {}", result.applied, path);
 			else
 				log::info("schema verified ({})", path);
+			// A key into a table the Login server has not created yet waits; the next start adds it.
+			m_deferred_foreign_keys = result.deferred_foreign_keys.size();
+			for (const schemata::DeferredForeignKey& key : result.deferred_foreign_keys)
+				log::warning("foreign key {} deferred: waiting for table {}", key.name, key.referenced_table);
 			return true;
 		}
 		catch (const std::exception& failure)
