@@ -156,6 +156,126 @@ namespace tests
 		}
 	}
 
+	namespace
+	{
+		// True when the live characters table holds the key to accounts(id) with ON DELETE CASCADE.
+		bool has_account_key(const std::string& path)
+		{
+			std::unique_ptr<schemata::driver::Connection> connection = schemata::sqlite(path);
+			const schemata::SchemaSnapshot live = schemata::read_schema(*connection);
+			for (const schemata::SnapshotTable& table : live.tables)
+			{
+				if (table.name != "characters")
+					continue;
+				for (const schemata::SnapshotForeignKey& key : table.foreign_keys)
+					if (key.referenced_table == "accounts" && key.columns == std::vector<std::string>{ "account_id" }
+						&& key.referenced_columns == std::vector<std::string>{ "id" } && key.on_delete == schemata::ReferentialAction::cascade)
+						return true;
+			}
+			return false;
+		}
+
+		std::int64_t add_account(schemata::driver::Connection& connection, schemata::Model& model, std::string_view name)
+		{
+			schemata::Context login(connection, model);
+			login_account account;
+			account.name = std::string(name);
+			account.name_key = std::string(name);
+			account.password_hash = "h";
+			account.password_salt = "s";
+			account.created_at = std::chrono::floor<std::chrono::microseconds>(std::chrono::system_clock::now());
+			login.add(account);
+			login.save_changes();
+			return account.id;
+		}
+
+		bool save_new(character_store& store, character_record record, std::string& error)
+		{
+			return store.save(record, error);
+		}
+
+		bool save_refused(character_store& store, character_record record)
+		{
+			std::string error;
+			return !store.save(record, error) && !error.empty();
+		}
+
+		// WORLD-007: characters.account_id references the Login server's accounts(id) and cascades on delete, in a players.db
+		// both models share, with the World starting after the Login server and before it.
+		void account_key_tests(runner& t, const std::filesystem::path& folder)
+		{
+			std::string error;
+
+			// Login first: the key is added by the World's first start.
+			{
+				const std::filesystem::path dir = folder / "account_key_tests" / "login_first";
+				std::error_code ignored;
+				std::filesystem::remove_all(dir, ignored);
+				std::filesystem::create_directories(dir);
+				const std::string path = (dir / "players.db").string();
+				schemata::Model login_model;
+				login_model.add<login_account>();
+				std::unique_ptr<schemata::driver::Connection> login = schemata::sqlite(path);
+				t.check(schemata::ensure_schema(*login, login_model).applied > 0, "login first: accounts created");
+				const std::int64_t keep = add_account(*login, login_model, "keep");
+				const std::int64_t gone = add_account(*login, login_model, "gone");
+
+				database db;
+				t.check(db.open(path, 2, error) && db.deferred_foreign_keys() == 0, std::format("login first: world opens, nothing deferred ({})", error));
+				t.check(has_account_key(path), "login first: characters has the key to accounts(id), cascade on delete");
+				character_store store(db);
+				t.check(save_refused(store, make_character("Ghost", gone + 1000)), "character for a missing account refused");
+				t.check(!store.exists("Ghost", error), "refused character left no row");
+				t.check(save_new(store, make_character("Kept", keep), error), std::format("character for an existing account saves ({})", error));
+				t.check(save_new(store, make_character("Gone1", gone), error) && save_new(store, make_character("Gone2", gone), error), "two characters for the doomed account");
+				t.check(count_of(db, "characters") == 3 && count_of(db, "character_items") == 210, "three characters, 210 items");
+
+				schemata::from<login_account>(*login, login_model).where(schemata::col(&login_account::id) == gone).remove();
+				t.check(count_of(db, "characters") == 1 && count_of(db, "character_items") == 70 && count_of(db, "character_skills") == 9 && count_of(db, "character_magic") == 12,
+					"deleting the account cascades to its characters and their items, skills and magic");
+				t.check(store.exists("Kept", error) && !store.exists("Gone1", error) && !store.exists("Gone2", error), "only the other account's character is left");
+
+				database next;
+				t.check(next.open(path, 1, error) && next.deferred_foreign_keys() == 0 && has_account_key(path), "a later start keeps the key");
+				t.check(schemata::ensure_schema(*login, login_model).applied == 0, "the login model still has nothing to apply");
+			}
+
+			// World first: the key is deferred, then added by the next start, with a row already waiting on it.
+			{
+				const std::filesystem::path dir = folder / "account_key_tests" / "world_first";
+				std::error_code ignored;
+				std::filesystem::remove_all(dir, ignored);
+				std::filesystem::create_directories(dir);
+				const std::string path = (dir / "players.db").string();
+
+				database first;
+				t.check(first.open(path, 2, error), std::format("world first: opens with no accounts table ({})", error));
+				t.check(first.deferred_foreign_keys() == 1, std::format("world first: the key is deferred ({} deferred)", first.deferred_foreign_keys()));
+				t.check(!has_account_key(path), "world first: no key yet");
+				character_store store(first);
+				t.check(save_new(store, make_character("Early", 1), error), std::format("world first: a character saves while the key waits ({})", error));
+
+				schemata::Model login_model;
+				login_model.add<login_account>();
+				std::unique_ptr<schemata::driver::Connection> login = schemata::sqlite(path);
+				t.check(schemata::ensure_schema(*login, login_model).applied > 0, "world first: the Login server then creates accounts");
+				t.check(add_account(*login, login_model, "early") == 1, "world first: account 1 exists");
+
+				database second;
+				t.check(second.open(path, 2, error), std::format("world first: second start ({})", error));
+				t.check(second.deferred_foreign_keys() == 0 && has_account_key(path), "world first: the second start adds the key");
+				character_store later(second);
+				t.check(later.exists("Early", error) && count_of(second, "character_items") == 70, "world first: the waiting character survived the rebuild");
+				t.check(save_refused(later, make_character("Ghost", 99)), "world first: a missing account is now refused");
+
+				database third;
+				t.check(third.open(path, 1, error) && third.deferred_foreign_keys() == 0 && has_account_key(path), "world first: a third start changes nothing");
+				schemata::from<login_account>(*login, login_model).where(schemata::col(&login_account::id) == 1).remove();
+				t.check(count_of(second, "characters") == 0 && count_of(second, "character_items") == 0, "world first: deleting the account removes the character");
+			}
+		}
+	}
+
 	void character_tests(runner& t, const std::filesystem::path& folder)
 	{
 		const std::filesystem::path dir = folder / "character_tests";
@@ -169,6 +289,7 @@ namespace tests
 		schemata::Model login_model;
 		login_model.add<login_account>();
 		auto login_pool = [&] { return schemata::sqlite(path); };
+		std::int64_t bob_id = 0;
 		{
 			std::unique_ptr<schemata::driver::Connection> login_connection_owner = login_pool();
 			schemata::driver::Connection& login_connection = *login_connection_owner;
@@ -183,6 +304,7 @@ namespace tests
 			login.add(bob);
 			login.save_changes();
 			t.check(bob.id > 0, "account row stored");
+			bob_id = bob.id;
 		}
 
 		database db;
@@ -205,8 +327,10 @@ namespace tests
 		character_record missing;
 		t.check(store.load("Aria", missing, error) == load_result::not_found, "unknown character is not_found");
 
-		// Round trip: the account id is a plain column, any value is accepted (no foreign key until SCH-0054).
-		character_record aria = make_character("Aria", 424242);
+		t.check(db.deferred_foreign_keys() == 0, "accounts existed: no foreign key deferred");
+
+		// Round trip: the account id must name an existing account (foreign key to the Login's accounts, WORLD-007).
+		character_record aria = make_character("Aria", bob_id);
 		t.check(store.save(aria, error), std::format("insert saves ({})", error));
 		t.check(aria.header.id > 0, "insert sets the id");
 		t.check(aria.header.name_key == "aria", "name key is lowercase");
@@ -251,14 +375,14 @@ namespace tests
 		t.check(count_of(db, "character_items") == 70 && count_of(db, "character_skills") == 10 && count_of(db, "character_magic") == 11, "no orphaned old child rows");
 
 		// A second character is independent.
-		character_record bard = make_character("Bard", 1);
+		character_record bard = make_character("Bard", bob_id);
 		t.check(store.save(bard, error), "second character saves");
 		t.check(count_of(db, "characters") == 2 && count_of(db, "character_items") == 140, "two characters, 140 items");
 		character_record bard_loaded;
 		t.check(store.load("bard", bard_loaded, error) == load_result::loaded && same_record(bard_loaded, bard), "second character round-trips");
 
 		// The name is the unique key.
-		character_record twin = make_character("ARIA", 2);
+		character_record twin = make_character("ARIA", bob_id);
 		t.check(!store.save(twin, error) && !error.empty(), "duplicate name (any case) refused");
 		t.check(count_of(db, "characters") == 2 && count_of(db, "character_items") == 140, "refused insert left nothing behind");
 
@@ -302,5 +426,7 @@ namespace tests
 			schemata::Context login(login_connection, login_model);
 			t.check(schemata::ensure_schema(login_connection, login_model).applied == 0 && login.count_rows("accounts") == 1, "accounts still untouched after all World writes");
 		}
+
+		account_key_tests(t, folder);
 	}
 }

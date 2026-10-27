@@ -1,6 +1,6 @@
-## Character list, create and delete
+## Foreign key from characters to accounts
 
-**Added**
-- Characters are listed, created and deleted on the World server, and new characters start with the classic starting kit.
+**Changed**
+- Deleting an account also deletes its characters.
 
-Summary: Character select is served by the World (2026-10-27)
+Summary: Characters belong to their account in the database (2026-10-27)

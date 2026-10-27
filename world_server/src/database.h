@@ -26,8 +26,15 @@ namespace hb::server::world
 			return m_model;
 		}
 
+		// Foreign keys the last open() could not add yet (their table belongs to the Login server and is not created).
+		std::size_t deferred_foreign_keys() const
+		{
+			return m_deferred_foreign_keys;
+		}
+
 	private:
 		schemata::Model m_model;
 		std::unique_ptr<schemata::ConnectionPool> m_pool;
+		std::size_t m_deferred_foreign_keys = 0;
 	};
 }

@@ -25,7 +25,7 @@ namespace hb::server::world
 	struct character
 	{
 		std::int64_t id = 0;
-		// The Login server's accounts.id. A plain column: the foreign key comes with Schemata SCH-0054 `references_unowned`.
+		// The Login server's accounts.id: a foreign key into a table this model does not map (see describe below).
 		std::int64_t account_id = 0;
 		std::string name;
 		// Lowercase name: the unique key, so "Bob" and "bob" are one character.
@@ -172,7 +172,9 @@ struct schemata::Entity<hb::server::world::character>
 		namespace world = hb::server::world;
 		e.table("characters");
 		SCH_KEY(e, id).identity();
-		// No foreign key to the Login server's accounts.id yet: it arrives with Schemata SCH-0054 `references_unowned`.
+		// accounts belongs to the Login server and is never mapped here: deleting an account deletes its characters. If the
+		// Login server has not created the table yet the key is deferred and the next start adds it (WORLD-007).
+		e.references_unowned({ "account_id" }, "accounts", { "id" }).on_delete(schemata::ReferentialAction::cascade);
 		SCH_PROP(e, account_id).indexed();
 		SCH_PROP(e, name).max_length(world::max_character_name_length);
 		SCH_PROP(e, name_key).max_length(world::max_character_name_length).unique();
