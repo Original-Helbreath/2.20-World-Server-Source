@@ -1,6 +1,6 @@
-## Run the World server as a console program
+## Connect the World to the Login server
 
 **Changed**
-- The World server runs in a console window and stops with Ctrl+C.
+- The World server now connects to the Login server instead of the old log and gate servers.
 
-Summary: The World server is now a plain console program (2026-10-27)
+Summary: The World and Login servers are connected (2026-10-27)

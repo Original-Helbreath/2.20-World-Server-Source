@@ -1,22 +1,27 @@
 // World server console host (WORLD-002): replaces the legacy Win32 window shell (Wmain.cpp).
 // Game logic is untouched; this file starts it, drives its 300 ms timer from the console thread, forwards the
-// legacy socket-event messages and shuts down on Ctrl+C or a console close.
+// legacy socket-event messages (the game clients' WSAAsyncSelect sockets) and shuts down on Ctrl+C or a console
+// close. WORLD-003 adds the Login link, polled from the same loop, in place of the legacy log and gate sockets.
 
 #include "log.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <exception>
+#include <memory>
 #include <string_view>
 
 #include "Game.h"
 #include "UserMessages.h"
+#include "login_link.h"
 #include "platform_win32.h"
+#include "world_config.h"
 
 char			G_cTxt[512];
 char			G_cData50000[50000];
 
 class XSocket * G_pListenSock = NULL;
-class XSocket * G_pLogSock    = NULL;
 class CGame *   G_pGame       = NULL;
 
 BOOL			G_bIsThread = TRUE;
@@ -27,8 +32,13 @@ extern FILE * pLogFile;				// legacy_log_files.cpp
 namespace
 {
 	constexpr std::string_view application_name = "world_server";
+	constexpr const char * config_file = "world_server.json";
 	// The game's own tick, as the old multimedia timer ran it.
 	constexpr std::chrono::milliseconds timer_interval{ 300 };
+	// The loop never sleeps longer than this, so the Login link's reads, heartbeats and timers stay prompt.
+	constexpr std::chrono::milliseconds link_poll_interval{ 20 };
+
+	std::unique_ptr<hb::server::world::login_link> G_pLoginLink;
 
 	// The legacy message log. Messages that flag a failure are raised to error, the rest are info.
 	hb::log::level classify(std::string_view message)
@@ -38,7 +48,7 @@ namespace
 		return hb::log::level::info;
 	}
 
-	// What WndProc used to do: the game's socket events arrive here as window messages (WSAAsyncSelect).
+	// What WndProc used to do: the game clients' socket events arrive here as window messages (WSAAsyncSelect).
 	LRESULT dispatch_message(UINT message, WPARAM first, LPARAM second, bool& handled)
 	{
 		if (G_pGame == NULL || G_bShutdown == TRUE) {
@@ -55,19 +65,7 @@ namespace
 			G_pGame->bAccept(G_pListenSock);
 			return 0;
 
-		case WM_ONGATESOCKETEVENT:
-			if (G_pGame->m_bOnExitProcess != TRUE) G_pGame->OnGateSocketEvent(message, first, second);
-			return 0;
-
-		case WM_ONLOGSOCKETEVENT:
-			G_pGame->OnMainLogSocketEvent(message, first, second);
-			return 0;
-
 		default:
-			if ((message >= WM_ONLOGSOCKETEVENT + 1) && (message <= WM_ONLOGSOCKETEVENT + DEF_MAXSUBLOGSOCK)) {
-				G_pGame->OnSubLogSocketEvent(message, first, second);
-				return 0;
-			}
 			if ((message >= WM_ONCLIENTSOCKETEVENT) && (message < WM_ONCLIENTSOCKETEVENT + DEF_MAXCLIENTS)) {
 				G_pGame->OnClientSocketEvent(message, first, second);
 				return 0;
@@ -87,11 +85,59 @@ namespace
 		return 0;
 	}
 
+	// The Login link: registers this World, keeps the heartbeats going and reconnects. The game activates once it
+	// is registered and refuses new players while it is down.
+	void start_login_link(const hb::server::world::world_config& config)
+	{
+		namespace world = hb::server::world;
+
+		world::link_registration registration;
+		registration.client_host = G_pGame->m_cGameServerAddr;
+		registration.client_port = static_cast<std::uint16_t>(G_pGame->m_iGameServerPort);
+		registration.max_players = static_cast<std::uint16_t>(DEF_MAXCLIENTS - 1);
+
+		world::link_events events;
+		events.on_registered = [] {
+			if (G_pGame != NULL) G_pGame->m_bIsLoginLinkAvailable = TRUE;
+		};
+		events.on_lost = [] {
+			if (G_pGame != NULL) G_pGame->m_bIsLoginLinkAvailable = FALSE;
+			hb::log::warning("refusing new players until the Login link is back");
+		};
+		events.on_refused = [](std::string_view) {
+			hb::server::world::platform::request_stop("the Login server refused this World");
+		};
+		events.report = [] {
+			world::link_report report;
+			if (G_pGame == NULL) return report;
+			report.is_accepting_players = (G_pGame->m_bIsGameStarted == TRUE) && (G_pGame->m_bOnExitProcess == FALSE)
+				&& (G_pGame->m_bIsLoginLinkAvailable == TRUE);
+			report.is_shutting_down = (G_pGame->m_bOnExitProcess == TRUE);
+			report.player_count = static_cast<std::uint16_t>(std::clamp(G_pGame->m_iTotalClients, 0, 65535));
+			report.max_players = static_cast<std::uint16_t>(DEF_MAXCLIENTS - 1);
+			return report;
+		};
+
+		G_pLoginLink = std::make_unique<world::login_link>(config, std::move(registration), std::move(events));
+		G_pLoginLink->start();
+	}
+
 	bool initialize()
 	{
 		namespace platform = hb::server::world::platform;
 
 		hb::log::info("Helbreath World Server V{}.{} build {}", DEF_UPPERVERSION, DEF_LOWERVERSION, DEF_BUILDDATE);
+
+		hb::server::world::world_config config;
+		std::string config_error;
+		if (!hb::server::world::load_world_config(config_file, config, config_error)) {
+			hb::log::error("{}", config_error);
+			return false;
+		}
+		hb::log::set_level(config.log_level);
+		if (hb::server::world::is_sample_key(config))
+			hb::log::warning("link_key is the all-zero sample key; set a real key before deploying");
+		hb::log::info("world {}, Login server at {}:{}", config.world_name, config.login_address, config.login_port);
 
 		if (_InitWinsock() == FALSE) {
 			hb::log::error("Winsock 2.2 not available");
@@ -116,10 +162,13 @@ namespace
 			return false;
 		}
 		hb::log::info("listening on {}:{}", G_pGame->m_cGameServerAddr, G_pGame->m_iGameServerPort);
+
+		start_login_link(config);
 		return true;
 	}
 
-	// The game's timer and event loop: socket messages are pumped as they arrive, the game ticks every 300 ms.
+	// The game's timer and event loop: socket messages are pumped as they arrive, the Login link is polled, and the
+	// game ticks every 300 ms.
 	void run_loop()
 	{
 		namespace platform = hb::server::world::platform;
@@ -127,6 +176,7 @@ namespace
 
 		auto next_tick = clock::now() + timer_interval;
 		while (!platform::stop_requested()) {
+			if (G_pLoginLink) G_pLoginLink->poll();
 			auto now = clock::now();
 			if (now >= next_tick) {
 				if (G_bShutdown == FALSE) G_pGame->OnTimer(0);
@@ -135,7 +185,8 @@ namespace
 				now = clock::now();
 			}
 			if (platform::stop_requested()) break;
-			const auto wait = std::chrono::duration_cast<std::chrono::milliseconds>(next_tick - now);
+			// (std::min) in parentheses: windows.h defines a min macro.
+			const auto wait = (std::min)(std::chrono::duration_cast<std::chrono::milliseconds>(next_tick - now), link_poll_interval);
 			platform::pump(wait.count() > 0 ? static_cast<unsigned>(wait.count()) : 0u);
 		}
 	}
@@ -150,10 +201,13 @@ namespace
 		if (G_pGame != NULL && G_pGame->m_iTotalClients > 0)
 			hb::log::warning("{} player(s) still connected; their data is not saved", G_pGame->m_iTotalClients);
 
+		if (G_pLoginLink) {
+			G_pLoginLink->stop();
+			G_pLoginLink.reset();
+		}
+
 		if (G_pListenSock != NULL) delete G_pListenSock;
 		G_pListenSock = NULL;
-		if (G_pLogSock != NULL) delete G_pLogSock;
-		G_pLogSock = NULL;
 
 		if (G_pGame != NULL) {
 			G_pGame->Quit();

@@ -2,7 +2,8 @@
 
 // The World host's only Win32 code (Standards sect. 8). The legacy game logic receives its socket events as window
 // messages (WSAAsyncSelect), so the host keeps one hidden message-only window and pumps it from the console
-// thread; nothing is ever shown. WORLD-003 retires this when the Login link replaces the legacy sockets.
+// thread; nothing is ever shown. The window now serves the game clients' sockets only (the Login link runs on Asio);
+// it goes when the client network layer is converted to the shared net layer.
 
 #include <windows.h>
 
